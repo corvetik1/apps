@@ -1,1 +1,119 @@
-/* Your styles goes here. */
+/* Основные стили для контейнера приложения */
+.container {
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Стили для хедера */
+.header {
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 32px;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+}
+
+.header p {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+/* Стили для основного содержимого */
+.main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+@media (min-width: 768px) {
+  .main {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+/* Стили для информационного раздела */
+.infoSection {
+  background-color: #f9f9f9;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.infoSection h2 {
+  color: #3498db;
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.infoSection p {
+  margin-bottom: 20px;
+}
+
+/* Стили для кнопки */
+.button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #27ae60;
+}
+
+/* Стили для раздела дорожной карты */
+.roadmapSection {
+  background-color: #f9f9f9;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.roadmapSection h2 {
+  color: #3498db;
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.roadmapList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.roadmapItem {
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.roadmapItem:last-child {
+  border-bottom: none;
+}
+
+.roadmapItem.current {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+/* Стили для футера */
+.footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 14px;
+}

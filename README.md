@@ -4,6 +4,74 @@
 
 Современная финансовая платформа, разработанная с использованием монорепозитория на базе Nx Workspace. Проект включает в себя frontend (React + Vite) и backend (NestJS) части, а также общие библиотеки для переиспользования кода.
 
+## Текущий статус
+
+### Текущий этап: MVP-0 (Каркас)
+
+Завершены работы по блоку A (Подготовка окружения):
+
+- ✅ Настроен монорепозиторий на базе Nx Workspace
+- ✅ Настроены инструменты качества кода (ESLint, Prettier, Husky)
+- ✅ Настроено тестовое окружение (Jest, Testing Library)
+- ✅ Настроен MSW для моков API
+- ✅ Настроен CI/CD через GitHub Actions
+- ✅ Создана базовая документация
+
+Репозиторий: [https://github.com/corvetik1/apps](https://github.com/corvetik1/apps)
+
+## Дорожная карта
+
+Проект разрабатывается инкрементально, согласно следующей дорожной карте:
+
+### MVP-0: Каркас (текущий этап)
+
+- ✅ Базовый каркас (Router, пустой store, MSW /health)
+- ✅ CI с lint и базовыми тестами
+- ✅ Настройка окружения разработки
+
+### MVP-1: Аутентификация
+
+- ⬜ AuthSlice, authApi
+- ⬜ Login UI, ProtectedRoute
+- ⬜ MSW /v1/auth/\*
+
+### MVP-2: Пользователи + роли
+
+- ⬜ UsersSlice, List view
+- ⬜ RBAC guard
+- ⬜ /v1/users
+
+### MVP-3: Тендеры
+
+- ⬜ List + Create + Delete
+- ⬜ tendersApi
+- ⬜ Prisma migration 001
+
+### MVP-4: Финансы
+
+- ⬜ Accounts list
+- ⬜ Balance calculation
+- ⬜ /v1/finance/accounts
+
+## Блоки разработки
+
+- ✅ **Блок A**: Подготовка окружения (Vite/Vitest/ESLint/Husky/Storybook)
+- ⬜ **Блок B**: Типы и DTO (User ... AnalyticsRecord)
+- ⬜ **Блок C**: State-менеджмент (RTK Query, Redux Toolkit)
+- ⬜ **Блок D**: MSW-моки (JSON + handlers)
+- ⬜ **Блок E**: Интеграционные тесты (FE)
+- ⬜ **Блок F**: Юнит-тесты (FE)
+- ⬜ **Блок G**: Storybook + Visual diff
+- ⬜ **Блок H**: CI/CD Frontend
+- ⬜ **Блок I**: Инициализация БД (Prisma, сиды)
+- ⬜ **Блок J**: NestJS-модули
+- ⬜ **Блок K**: Auth + RBAC/ABAC
+- ⬜ **Блок L**: Внешние интеграции (AI, Analytics)
+- ⬜ **Блок M**: Тесты бэкенда
+- ⬜ **Блок N**: Docker + CI/CD Backend
+- ⬜ **Блок O**: Безопасность + Мониторинг
+- ⬜ **Блок P**: Финальная интеграция
+
 ## Структура проекта
 
 Проект организован как монорепозиторий Nx со следующей структурой:
