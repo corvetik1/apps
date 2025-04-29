@@ -1,0 +1,19 @@
+{
+  "name": "web-mocks",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "mocks/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/mocks",
+        "main": "mocks/src/index.ts",
+        "tsConfig": "mocks/tsconfig.lib.json",
+        "assets": ["mocks/*.md"]
+      }
+    }
+  }
+}
