@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Debt",
+  "description": "Долг в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "userId",
+    "title",
+    "description",
+    "amount",
+    "currency",
+    "interestRate",
+    "startDate",
+    "endDate",
+    "status",
+    "remainingAmount",
+    "nextPaymentDate",
+    "nextPaymentAmount",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор долга",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца долга",
+      "examples": ["user1"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Название долга",
+      "examples": ["Долг по кредиту"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание долга",
+      "examples": ["Задолженность по кредитному договору №123"]
+    },
+    "amount": {
+      "type": "number",
+      "description": "Общая сумма долга",
+      "examples": [50000]
+    },
+    "currency": {
+      "type": "string",
+      "description": "Валюта долга",
+      "examples": ["RUB", "USD", "EUR"]
+    },
+    "interestRate": {
+      "type": "number",
+      "description": "Процентная ставка",
+      "examples": [12.5, 10.0]
+    },
+    "startDate": {
+      "type": "string",
+      "description": "Дата начала долга",
+      "examples": ["2023-01-01"]
+    },
+    "endDate": {
+      "type": "string",
+      "description": "Дата окончания долга",
+      "examples": ["2023-12-31"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "paid", "overdue", "restructured", "written_off"],
+      "description": "Статус долга",
+      "examples": ["active", "paid", "overdue"]
+    },
+    "remainingAmount": {
+      "type": "number",
+      "description": "Оставшаяся сумма долга",
+      "examples": [40000]
+    },
+    "nextPaymentDate": {
+      "type": ["string", "null"],
+      "description": "Дата следующего платежа",
+      "examples": ["2023-02-01", null]
+    },
+    "nextPaymentAmount": {
+      "type": "number",
+      "description": "Сумма следующего платежа",
+      "examples": [5000]
+    },
+    "creditorName": {
+      "type": "string",
+      "description": "Название кредитора",
+      "examples": ["Банк Открытие"]
+    },
+    "creditorContacts": {
+      "type": "string",
+      "description": "Контакты кредитора",
+      "examples": ["info@open.ru"]
+    },
+    "documentIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Список идентификаторов документов",
+      "examples": [["doc1", "doc2"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания долга",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления долга",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

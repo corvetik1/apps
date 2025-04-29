@@ -1,0 +1,286 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnalyticsResponse",
+  "description": "Ответ с аналитикой",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["userId", "period"],
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор пользователя",
+      "examples": ["user1"]
+    },
+    "period": {
+      "type": "string",
+      "enum": ["day", "week", "month", "quarter", "year"],
+      "description": "Период аналитики",
+      "examples": ["month", "year"]
+    },
+    "startDate": {
+      "type": "string",
+      "description": "Дата начала периода",
+      "examples": ["2023-01-01"]
+    },
+    "endDate": {
+      "type": "string",
+      "description": "Дата окончания периода",
+      "examples": ["2023-01-31"]
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Метрики аналитики",
+      "properties": {
+        "totalIncome": {
+          "type": "number",
+          "description": "Общий доход",
+          "examples": [10000]
+        },
+        "totalExpense": {
+          "type": "number",
+          "description": "Общий расход",
+          "examples": [8000]
+        },
+        "balance": {
+          "type": "number",
+          "description": "Баланс (доход - расход)",
+          "examples": [2000]
+        },
+        "transactionCount": {
+          "type": "number",
+          "description": "Количество транзакций",
+          "examples": [50]
+        },
+        "averageTransaction": {
+          "type": "number",
+          "description": "Средняя сумма транзакции",
+          "examples": [200]
+        },
+        "topCategories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Название категории",
+                "examples": ["Продукты"]
+              },
+              "amount": {
+                "type": "number",
+                "description": "Сумма",
+                "examples": [3000]
+              }
+            },
+            "required": ["name", "amount"]
+          },
+          "description": "Топ категорий по расходам",
+          "examples": [[{ "name": "Продукты", "amount": 3000 }]]
+        }
+      },
+      "required": [
+        "totalIncome",
+        "totalExpense",
+        "balance",
+        "transactionCount",
+        "averageTransaction",
+        "topCategories"
+      ]
+    },
+    "charts": {
+      "type": "object",
+      "description": "Графики аналитики",
+      "properties": {
+        "income": {
+          "type": "object",
+          "description": "График доходов",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Подписи для оси X"
+            },
+            "datasets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "Название набора данных"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "description": "Массив значений"
+                  },
+                  "backgroundColor": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ],
+                    "description": "Цвет фона"
+                  },
+                  "borderColor": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ],
+                    "description": "Цвет границы"
+                  }
+                },
+                "required": ["label", "data"]
+              },
+              "description": "Наборы данных для графика"
+            }
+          },
+          "required": ["labels", "datasets"]
+        },
+        "expense": {
+          "type": "object",
+          "description": "График расходов",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Подписи для оси X"
+            },
+            "datasets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "Название набора данных"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "description": "Массив значений"
+                  },
+                  "backgroundColor": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ],
+                    "description": "Цвет фона"
+                  },
+                  "borderColor": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ],
+                    "description": "Цвет границы"
+                  }
+                },
+                "required": ["label", "data"]
+              },
+              "description": "Наборы данных для графика"
+            }
+          },
+          "required": ["labels", "datasets"]
+        },
+        "categories": {
+          "type": "object",
+          "description": "График по категориям",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Подписи для оси X"
+            },
+            "datasets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "Название набора данных"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "description": "Массив значений"
+                  },
+                  "backgroundColor": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ],
+                    "description": "Цвет фона"
+                  },
+                  "borderColor": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ],
+                    "description": "Цвет границы"
+                  }
+                },
+                "required": ["label", "data"]
+              },
+              "description": "Наборы данных для графика"
+            }
+          },
+          "required": ["labels", "datasets"]
+        }
+      }
+    }
+  }
+}

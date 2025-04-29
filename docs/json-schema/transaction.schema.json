@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Transaction",
+  "description": "Транзакция в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tenderId",
+    "amount",
+    "currency",
+    "date",
+    "type",
+    "description",
+    "accountId",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор транзакции",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "tenderId": {
+      "type": "string",
+      "description": "Идентификатор связанного тендера",
+      "examples": ["tender1"]
+    },
+    "amount": {
+      "type": "number",
+      "description": "Сумма транзакции",
+      "examples": [1000, 5000]
+    },
+    "currency": {
+      "type": "string",
+      "description": "Валюта транзакции",
+      "examples": ["RUB", "USD", "EUR"]
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время транзакции",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["income", "expense"],
+      "description": "Тип транзакции (доход/расход)",
+      "examples": ["income", "expense"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание транзакции",
+      "examples": ["Зарплата", "Покупка продуктов"]
+    },
+    "accountId": {
+      "type": "string",
+      "description": "Идентификатор счета",
+      "examples": ["account1"]
+    },
+    "categoryId": {
+      "type": "string",
+      "description": "Идентификатор категории",
+      "examples": ["category1"]
+    },
+    "counterpartyId": {
+      "type": "string",
+      "description": "Идентификатор контрагента",
+      "examples": ["counterparty1"]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги транзакции",
+      "examples": [["покупка", "электроника"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания транзакции",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления транзакции",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

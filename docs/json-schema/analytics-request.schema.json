@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnalyticsRequest",
+  "description": "Запрос на аналитику",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["userId", "period"],
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор пользователя",
+      "examples": ["user1"]
+    },
+    "period": {
+      "type": "string",
+      "enum": ["day", "week", "month", "quarter", "year"],
+      "description": "Период аналитики",
+      "examples": ["month", "year"]
+    },
+    "startDate": {
+      "type": "string",
+      "description": "Дата начала периода",
+      "examples": ["2023-01-01"]
+    },
+    "endDate": {
+      "type": "string",
+      "description": "Дата окончания периода",
+      "examples": ["2023-01-31"]
+    },
+    "includeCharts": {
+      "type": "boolean",
+      "description": "Флаг включения графиков в ответ",
+      "examples": [true]
+    },
+    "includeMetrics": {
+      "type": "boolean",
+      "description": "Флаг включения метрик в ответ",
+      "examples": [true]
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Список категорий для фильтрации",
+      "examples": [["Продукты", "Транспорт"]]
+    }
+  }
+}

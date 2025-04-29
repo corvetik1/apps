@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Settings",
+  "description": "Настройки пользователя в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "userId",
+    "theme",
+    "language",
+    "defaultCurrency",
+    "currencyFormat",
+    "dateFormat",
+    "timeFormat",
+    "notificationsEnabled",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор настроек",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор пользователя",
+      "examples": ["user1"]
+    },
+    "theme": {
+      "type": "string",
+      "enum": ["light", "dark", "system"],
+      "description": "Режим темы",
+      "examples": ["light", "dark", "system"]
+    },
+    "language": {
+      "type": "string",
+      "enum": ["ru", "en"],
+      "description": "Язык",
+      "examples": ["ru", "en"]
+    },
+    "defaultCurrency": {
+      "type": "string",
+      "description": "Валюта по умолчанию",
+      "examples": ["RUB", "USD", "EUR"]
+    },
+    "currencyFormat": {
+      "type": "string",
+      "enum": ["symbol", "code", "symbol_code"],
+      "description": "Формат валюты",
+      "examples": ["symbol", "code", "symbol_code"]
+    },
+    "dateFormat": {
+      "type": "string",
+      "description": "Формат даты",
+      "examples": ["DD.MM.YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]
+    },
+    "timeFormat": {
+      "type": "string",
+      "description": "Формат времени",
+      "examples": ["24h", "12h"]
+    },
+    "notificationsEnabled": {
+      "type": "boolean",
+      "description": "Включены ли уведомления",
+      "examples": [true, false]
+    },
+    "emailNotifications": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Включены ли уведомления по электронной почте",
+          "examples": [true, false]
+        },
+        "dailySummary": {
+          "type": "boolean",
+          "description": "Ежедневная сводка",
+          "examples": [true, false]
+        },
+        "weeklyReport": {
+          "type": "boolean",
+          "description": "Еженедельный отчет",
+          "examples": [true, false]
+        },
+        "importantAlerts": {
+          "type": "boolean",
+          "description": "Важные уведомления",
+          "examples": [true, false]
+        }
+      },
+      "description": "Настройки уведомлений по электронной почте"
+    },
+    "pushNotifications": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Включены ли push-уведомления",
+          "examples": [true, false]
+        },
+        "paymentReminders": {
+          "type": "boolean",
+          "description": "Напоминания о платежах",
+          "examples": [true, false]
+        },
+        "budgetAlerts": {
+          "type": "boolean",
+          "description": "Уведомления о бюджете",
+          "examples": [true, false]
+        },
+        "newFeatures": {
+          "type": "boolean",
+          "description": "Уведомления о новых функциях",
+          "examples": [true, false]
+        }
+      },
+      "description": "Настройки push-уведомлений"
+    },
+    "defaultView": {
+      "type": "string",
+      "description": "Представление по умолчанию",
+      "examples": ["dashboard", "accounts", "transactions"]
+    },
+    "dashboardWidgets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Виджеты на панели управления",
+      "examples": [["balance", "recent-transactions", "budget", "goals"]]
+    },
+    "privacySettings": {
+      "type": "object",
+      "properties": {
+        "hideAmounts": {
+          "type": "boolean",
+          "description": "Скрывать ли суммы",
+          "examples": [true, false]
+        },
+        "requirePasswordForSensitiveOperations": {
+          "type": "boolean",
+          "description": "Требовать ли пароль для чувствительных операций",
+          "examples": [true, false]
+        },
+        "sessionTimeout": {
+          "type": "number",
+          "description": "Таймаут сессии в минутах",
+          "examples": [30, 60, 120]
+        }
+      },
+      "description": "Настройки приватности"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания настроек",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления настроек",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

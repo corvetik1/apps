@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CreditCard",
+  "description": "Кредитная карта в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "accountId",
+    "userId",
+    "cardNumber",
+    "cardHolder",
+    "expiryDate",
+    "cvv",
+    "isActive",
+    "balance",
+    "currency",
+    "creditLimit",
+    "debt",
+    "gracePeriod",
+    "interestRate",
+    "minPayment",
+    "paymentDueDate",
+    "isPaid",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор карты",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "accountId": {
+      "type": "string",
+      "description": "Идентификатор связанного счета",
+      "examples": ["account1"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца карты",
+      "examples": ["user1"]
+    },
+    "cardNumber": {
+      "type": "string",
+      "description": "Номер карты",
+      "examples": ["1234 5678 9012 3456"]
+    },
+    "cardHolder": {
+      "type": "string",
+      "description": "Имя держателя карты",
+      "examples": ["IVAN IVANOV"]
+    },
+    "expiryDate": {
+      "type": "string",
+      "description": "Срок действия карты (MM/YY)",
+      "examples": ["12/25"]
+    },
+    "cvv": {
+      "type": "string",
+      "description": "CVV/CVC код карты",
+      "examples": ["123"]
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Флаг активности карты",
+      "examples": [true, false]
+    },
+    "balance": {
+      "type": "number",
+      "description": "Текущий баланс карты",
+      "examples": [5000]
+    },
+    "currency": {
+      "type": "string",
+      "description": "Валюта карты",
+      "examples": ["RUB", "USD", "EUR"]
+    },
+    "bank": {
+      "type": "string",
+      "description": "Банк-эмитент",
+      "examples": ["Сбербанк", "Тинькофф"]
+    },
+    "paymentSystem": {
+      "type": "string",
+      "description": "Платежная система",
+      "examples": ["Visa", "Mastercard", "МИР"]
+    },
+    "creditLimit": {
+      "type": "number",
+      "description": "Кредитный лимит",
+      "examples": [100000]
+    },
+    "debt": {
+      "type": "number",
+      "description": "Текущая задолженность",
+      "examples": [5000]
+    },
+    "gracePeriod": {
+      "type": "number",
+      "description": "Льготный период в днях",
+      "examples": [30, 60, 90]
+    },
+    "interestRate": {
+      "type": "number",
+      "description": "Процентная ставка",
+      "examples": [19.9, 22.5]
+    },
+    "minPayment": {
+      "type": "number",
+      "description": "Минимальный платеж",
+      "examples": [1000]
+    },
+    "paymentDueDate": {
+      "type": "string",
+      "description": "Дата платежа",
+      "examples": ["2023-02-01"]
+    },
+    "isPaid": {
+      "type": "boolean",
+      "description": "Флаг оплаты",
+      "examples": [true, false]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания карты",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления карты",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

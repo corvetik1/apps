@@ -1,0 +1,66 @@
+name: Schema Monitor
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'docs/json-schema/**'
+      - 'libs/shared/src/lib/types/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'docs/json-schema/**'
+      - 'libs/shared/src/lib/types/**'
+  # Возможность запустить workflow вручную из интерфейса GitHub
+  workflow_dispatch:
+
+jobs:
+  schema-monitor:
+    name: Monitor JSON Schema Changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Schema Monitor
+        run: pnpm schema:monitor
+
+      - name: Upload Schema Monitor Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-monitor-report
+          path: docs/schema-monitor-report.md
+          if-no-files-found: error
+
+      - name: Comment PR with Schema Monitor Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'docs/schema-monitor-report.md';
+            
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+              const reportSummary = report.split('\n\n')[0] + '\n\n' + 
+                                   (report.includes('Схемы с проблемами:') ? 
+                                    'Обнаружены проблемы в схемах. Подробности в отчете.' : 
+                                    '✅ Все схемы имеют соответствующие тесты без проблем');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## Отчет мониторинга JSON-схем\n\n${reportSummary}\n\nПолный отчет доступен в артефактах сборки.`
+              });
+            }

@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Counterparty",
+  "description": "Контрагент в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "userId", "name", "type", "status", "createdAt", "updatedAt"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор контрагента",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца контрагента",
+      "examples": ["user1"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Название контрагента",
+      "examples": ["ООО \"Рога и Копыта\""]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["individual", "company", "government", "bank", "other"],
+      "description": "Тип контрагента",
+      "examples": ["individual", "company", "government"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "blocked"],
+      "description": "Статус контрагента",
+      "examples": ["active", "inactive", "blocked"]
+    },
+    "inn": {
+      "type": "string",
+      "description": "ИНН",
+      "examples": ["7707083893"]
+    },
+    "kpp": {
+      "type": "string",
+      "description": "КПП",
+      "examples": ["770701001"]
+    },
+    "ogrn": {
+      "type": "string",
+      "description": "ОГРН",
+      "examples": ["1027700132195"]
+    },
+    "address": {
+      "type": "string",
+      "description": "Адрес",
+      "examples": ["г. Москва, ул. Примерная, д. 1"]
+    },
+    "contactPerson": {
+      "type": "string",
+      "description": "Контактное лицо",
+      "examples": ["Иванов Иван Иванович"]
+    },
+    "phone": {
+      "type": "string",
+      "description": "Телефон",
+      "examples": ["+7 (999) 123-45-67"]
+    },
+    "email": {
+      "type": "string",
+      "description": "Email",
+      "examples": ["info@example.com"]
+    },
+    "website": {
+      "type": "string",
+      "description": "Веб-сайт",
+      "examples": ["https://example.com"]
+    },
+    "bankDetails": {
+      "type": "object",
+      "required": ["accountNumber", "bik", "bankName", "correspondentAccount"],
+      "properties": {
+        "accountNumber": {
+          "type": "string",
+          "description": "Номер счета",
+          "examples": ["40702810100000000123"]
+        },
+        "bik": {
+          "type": "string",
+          "description": "БИК банка",
+          "examples": ["044525225"]
+        },
+        "bankName": {
+          "type": "string",
+          "description": "Название банка",
+          "examples": ["Сбербанк"]
+        },
+        "correspondentAccount": {
+          "type": "string",
+          "description": "Корреспондентский счет",
+          "examples": ["30101810400000000225"]
+        },
+        "currency": {
+          "type": "string",
+          "description": "Валюта счета",
+          "examples": ["RUB", "USD", "EUR"]
+        },
+        "additionalInfo": {
+          "type": "string",
+          "description": "Дополнительная информация",
+          "examples": ["Для платежей по договору №123"]
+        }
+      },
+      "description": "Банковские реквизиты"
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание",
+      "examples": ["Поставщик канцелярских товаров"]
+    },
+    "category": {
+      "type": "string",
+      "description": "Категория",
+      "examples": ["supplier", "client", "partner"]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги",
+      "examples": [["поставщик", "канцтовары"]]
+    },
+    "documentIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Список идентификаторов документов",
+      "examples": [["doc1", "doc2"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания контрагента",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления контрагента",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

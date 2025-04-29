@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIAnalysisRequest",
+  "description": "Запрос на AI-анализ",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["userId", "prompt", "data"],
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор пользователя",
+      "examples": ["user1"]
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Запрос пользователя",
+      "examples": ["Проанализируй мои расходы за последний месяц"]
+    },
+    "data": {
+      "type": "object",
+      "description": "Данные для анализа",
+      "properties": {
+        "transactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Идентификатор транзакции",
+                "examples": ["1"]
+              },
+              "amount": {
+                "type": "number",
+                "description": "Сумма транзакции",
+                "examples": [1000]
+              },
+              "date": {
+                "type": "string",
+                "description": "Дата транзакции",
+                "examples": ["2023-01-01"]
+              },
+              "description": {
+                "type": "string",
+                "description": "Описание транзакции",
+                "examples": ["Продукты"]
+              },
+              "type": {
+                "type": "string",
+                "description": "Тип транзакции (доход/расход)",
+                "examples": ["expense", "income"]
+              },
+              "category": {
+                "type": "string",
+                "description": "Категория транзакции",
+                "examples": ["Продукты"]
+              }
+            },
+            "required": ["id", "amount", "date", "description", "type"]
+          },
+          "description": "Список транзакций"
+        },
+        "period": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "description": "Дата начала периода",
+              "examples": ["2023-01-01"]
+            },
+            "end": {
+              "type": "string",
+              "description": "Дата окончания периода",
+              "examples": ["2023-01-31"]
+            }
+          },
+          "required": ["start", "end"],
+          "description": "Период анализа"
+        }
+      }
+    },
+    "options": {
+      "type": "object",
+      "description": "Опции анализа",
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "Язык ответа",
+          "examples": ["ru", "en"]
+        },
+        "format": {
+          "type": "string",
+          "description": "Формат ответа",
+          "examples": ["text", "json", "html"]
+        },
+        "maxTokens": {
+          "type": "number",
+          "description": "Максимальное количество токенов",
+          "examples": [500]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tender",
+  "description": "Тендер в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "description",
+    "status",
+    "amount",
+    "currency",
+    "startDate",
+    "endDate",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор тендера",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Название тендера",
+      "examples": ["Тендер на поставку оборудования"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание тендера",
+      "examples": ["Поставка компьютерного оборудования"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "closed", "cancelled", "draft", "published"],
+      "description": "Статус тендера",
+      "examples": ["open", "closed", "draft"]
+    },
+    "amount": {
+      "type": "number",
+      "description": "Сумма тендера",
+      "examples": [100000, 500000]
+    },
+    "currency": {
+      "type": "string",
+      "description": "Валюта тендера",
+      "examples": ["RUB", "USD", "EUR"]
+    },
+    "startDate": {
+      "type": "string",
+      "description": "Дата начала тендера",
+      "examples": ["2023-01-01"]
+    },
+    "endDate": {
+      "type": "string",
+      "description": "Дата окончания тендера",
+      "examples": ["2023-02-01"]
+    },
+    "categoryId": {
+      "type": "string",
+      "description": "Идентификатор категории",
+      "examples": ["category1"]
+    },
+    "location": {
+      "type": "string",
+      "description": "Местоположение",
+      "examples": ["Москва"]
+    },
+    "organizerId": {
+      "type": "string",
+      "description": "Идентификатор организатора",
+      "examples": ["user1"]
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Список идентификаторов участников",
+      "examples": [["user2", "user3"]]
+    },
+    "winnerId": {
+      "type": "string",
+      "description": "Идентификатор победителя",
+      "examples": ["user2"]
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Список идентификаторов документов",
+      "examples": [["doc1", "doc2"]]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги тендера",
+      "examples": [["оборудование", "компьютеры"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания тендера",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления тендера",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

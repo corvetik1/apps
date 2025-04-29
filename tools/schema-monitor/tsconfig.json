@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "outDir": "../../.schema-monitor-temp",
+    "types": ["node", "jest"],
+    "typeRoots": ["../../node_modules/@types"]
+  },
+  "include": ["../../libs/shared/src/lib/utils/schema-monitor.ts"],
+  "exclude": ["node_modules"]
+}

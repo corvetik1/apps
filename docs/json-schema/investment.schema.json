@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Investment",
+  "description": "Инвестиция в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "userId",
+    "title",
+    "description",
+    "type",
+    "status",
+    "amount",
+    "currency",
+    "purchaseDate",
+    "currentPrice",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор инвестиции",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца инвестиции",
+      "examples": ["user1"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Название инвестиции",
+      "examples": ["Акции Сбербанк"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание инвестиции",
+      "examples": ["Инвестиции в акции Сбербанка"]
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "stock",
+        "bond",
+        "etf",
+        "mutual_fund",
+        "real_estate",
+        "deposit",
+        "cryptocurrency",
+        "other"
+      ],
+      "description": "Тип инвестиции",
+      "examples": ["stock", "bond", "etf"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "sold", "pending", "frozen", "closed"],
+      "description": "Статус инвестиции",
+      "examples": ["active", "sold", "pending"]
+    },
+    "amount": {
+      "type": "number",
+      "description": "Сумма инвестиции",
+      "examples": [100000]
+    },
+    "currency": {
+      "type": "string",
+      "description": "Валюта инвестиции",
+      "examples": ["RUB", "USD", "EUR"]
+    },
+    "purchaseDate": {
+      "type": "string",
+      "description": "Дата покупки",
+      "examples": ["2023-01-01"]
+    },
+    "purchasePrice": {
+      "type": "number",
+      "description": "Цена покупки",
+      "examples": [250.5]
+    },
+    "currentPrice": {
+      "type": "number",
+      "description": "Текущая цена",
+      "examples": [270.8]
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Количество",
+      "examples": [400]
+    },
+    "ticker": {
+      "type": "string",
+      "description": "Тикер",
+      "examples": ["SBER", "AAPL", "MSFT"]
+    },
+    "exchange": {
+      "type": "string",
+      "description": "Биржа",
+      "examples": ["MOEX", "NYSE", "NASDAQ"]
+    },
+    "profit": {
+      "type": "number",
+      "description": "Прибыль",
+      "examples": [8120]
+    },
+    "profitPercentage": {
+      "type": "number",
+      "description": "Процент прибыли",
+      "examples": [8.12]
+    },
+    "dividends": {
+      "type": "number",
+      "description": "Дивиденды",
+      "examples": [2000]
+    },
+    "fees": {
+      "type": "number",
+      "description": "Комиссии",
+      "examples": [500]
+    },
+    "taxes": {
+      "type": "number",
+      "description": "Налоги",
+      "examples": [1000]
+    },
+    "maturityDate": {
+      "type": "string",
+      "description": "Дата погашения",
+      "examples": ["2025-01-01"]
+    },
+    "interestRate": {
+      "type": "number",
+      "description": "Процентная ставка",
+      "examples": [7.5]
+    },
+    "accountId": {
+      "type": "string",
+      "description": "Идентификатор связанного счета",
+      "examples": ["account1"]
+    },
+    "documentIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Список идентификаторов документов",
+      "examples": [["doc1", "doc2"]]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги инвестиции",
+      "examples": [["акции", "банк", "голубые фишки"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания инвестиции",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления инвестиции",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

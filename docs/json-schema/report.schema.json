@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Report",
+  "description": "Отчет в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "userId",
+    "title",
+    "description",
+    "type",
+    "format",
+    "status",
+    "parameters",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор отчета",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца отчета",
+      "examples": ["user1"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Название отчета",
+      "examples": ["Финансовый отчет за 2023 год"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание отчета",
+      "examples": ["Годовой финансовый отчет"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["financial", "tax", "budget", "investment", "expense", "income", "custom"],
+      "description": "Тип отчета",
+      "examples": ["financial", "tax", "budget"]
+    },
+    "format": {
+      "type": "string",
+      "enum": ["pdf", "excel", "csv", "json", "html"],
+      "description": "Формат отчета",
+      "examples": ["pdf", "excel", "csv"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "generated", "failed", "expired"],
+      "description": "Статус отчета",
+      "examples": ["pending", "generated", "failed"]
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Параметры отчета",
+      "examples": [
+        {
+          "startDate": "2023-01-01",
+          "endDate": "2023-12-31",
+          "includeCategories": ["income", "expense", "investment"],
+          "groupBy": "month"
+        }
+      ]
+    },
+    "fileUrl": {
+      "type": "string",
+      "description": "URL файла отчета",
+      "examples": ["https://example.com/reports/financial-2023.pdf"]
+    },
+    "fileSize": {
+      "type": "number",
+      "description": "Размер файла в байтах",
+      "examples": [1024000]
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время генерации отчета",
+      "examples": ["2024-01-05T10:00:00Z"]
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время истечения срока действия отчета",
+      "examples": ["2025-01-05T10:00:00Z"]
+    },
+    "filters": {
+      "type": "object",
+      "description": "Фильтры отчета",
+      "examples": [
+        {
+          "accounts": ["account1", "account2"],
+          "categories": ["salary", "rent", "food"],
+          "minAmount": 1000,
+          "maxAmount": 50000
+        }
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги отчета",
+      "examples": [["годовой", "финансы", "2023"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания отчета",
+      "examples": ["2024-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления отчета",
+      "examples": ["2024-01-05T10:00:00Z"]
+    }
+  }
+}

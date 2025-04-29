@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Note",
+  "description": "Заметка в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "userId",
+    "title",
+    "content",
+    "type",
+    "priority",
+    "isCompleted",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор заметки",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца заметки",
+      "examples": ["user1"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Заголовок заметки",
+      "examples": ["Важная встреча"]
+    },
+    "content": {
+      "type": "string",
+      "description": "Содержимое заметки",
+      "examples": ["Встреча с банком по вопросу кредита"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["general", "task", "reminder", "idea", "financial"],
+      "description": "Тип заметки",
+      "examples": ["general", "task", "reminder"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "urgent"],
+      "description": "Приоритет заметки",
+      "examples": ["low", "medium", "high", "urgent"]
+    },
+    "isCompleted": {
+      "type": "boolean",
+      "description": "Флаг завершенности заметки",
+      "examples": [false, true]
+    },
+    "dueDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Срок выполнения",
+      "examples": ["2023-02-15T10:00:00Z"]
+    },
+    "color": {
+      "type": "string",
+      "description": "Цвет заметки",
+      "examples": ["#FF5733", "#33FF57", "#3357FF"]
+    },
+    "entityId": {
+      "type": "string",
+      "description": "Идентификатор связанной сущности",
+      "examples": ["loan1", "account1", "transaction1"]
+    },
+    "entityType": {
+      "type": "string",
+      "description": "Тип связанной сущности",
+      "examples": ["loan", "account", "transaction"]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги заметки",
+      "examples": [["встреча", "банк", "кредит"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания заметки",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления заметки",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Loan",
+  "description": "Кредит в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "userId",
+    "title",
+    "description",
+    "type",
+    "amount",
+    "currency",
+    "interestRate",
+    "term",
+    "startDate",
+    "endDate",
+    "status",
+    "remainingAmount",
+    "nextPaymentDate",
+    "nextPaymentAmount",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор кредита",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца кредита",
+      "examples": ["user1"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Название кредита",
+      "examples": ["Ипотека"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание кредита",
+      "examples": ["Ипотечный кредит на квартиру"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["mortgage", "car", "consumer", "business", "education", "other"],
+      "description": "Тип кредита",
+      "examples": ["mortgage", "car", "consumer"]
+    },
+    "amount": {
+      "type": "number",
+      "description": "Общая сумма кредита",
+      "examples": [5000000]
+    },
+    "currency": {
+      "type": "string",
+      "description": "Валюта кредита",
+      "examples": ["RUB", "USD", "EUR"]
+    },
+    "interestRate": {
+      "type": "number",
+      "description": "Процентная ставка",
+      "examples": [9.5, 12.0]
+    },
+    "term": {
+      "type": "number",
+      "description": "Срок кредита в месяцах",
+      "examples": [240, 60, 36]
+    },
+    "startDate": {
+      "type": "string",
+      "description": "Дата начала кредита",
+      "examples": ["2023-01-01"]
+    },
+    "endDate": {
+      "type": "string",
+      "description": "Дата окончания кредита",
+      "examples": ["2043-01-01"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "paid", "overdue", "restructured", "approved", "rejected", "pending"],
+      "description": "Статус кредита",
+      "examples": ["active", "paid", "overdue"]
+    },
+    "remainingAmount": {
+      "type": "number",
+      "description": "Оставшаяся сумма кредита",
+      "examples": [4950000]
+    },
+    "nextPaymentDate": {
+      "type": ["string", "null"],
+      "description": "Дата следующего платежа",
+      "examples": ["2023-02-01", null]
+    },
+    "nextPaymentAmount": {
+      "type": "number",
+      "description": "Сумма следующего платежа",
+      "examples": [45000]
+    },
+    "paymentSchedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["date", "amount", "principal", "interest"],
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Дата платежа",
+            "examples": ["2023-02-01"]
+          },
+          "amount": {
+            "type": "number",
+            "description": "Общая сумма платежа",
+            "examples": [45000]
+          },
+          "principal": {
+            "type": "number",
+            "description": "Сумма основного долга",
+            "examples": [25000]
+          },
+          "interest": {
+            "type": "number",
+            "description": "Сумма процентов",
+            "examples": [20000]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["paid", "pending", "overdue"],
+            "description": "Статус платежа",
+            "examples": ["paid", "pending", "overdue"]
+          }
+        }
+      },
+      "description": "График платежей"
+    },
+    "lenderName": {
+      "type": "string",
+      "description": "Название кредитора",
+      "examples": ["Сбербанк"]
+    },
+    "lenderContacts": {
+      "type": "string",
+      "description": "Контакты кредитора",
+      "examples": ["info@sberbank.ru"]
+    },
+    "collateral": {
+      "type": "string",
+      "description": "Залоговое имущество",
+      "examples": ["Квартира по адресу г. Москва, ул. Примерная, д. 1, кв. 1"]
+    },
+    "documentIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Список идентификаторов документов",
+      "examples": [["doc1", "doc2"]]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания кредита",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления кредита",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}

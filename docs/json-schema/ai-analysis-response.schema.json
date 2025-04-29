@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIAnalysisResponse",
+  "description": "Ответ AI-анализа",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["userId", "requestId", "result", "createdAt"],
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор пользователя",
+      "examples": ["user1"]
+    },
+    "requestId": {
+      "type": "string",
+      "description": "Идентификатор запроса",
+      "examples": ["req1"]
+    },
+    "result": {
+      "type": "string",
+      "description": "Результат анализа в текстовом виде",
+      "examples": [
+        "За последний месяц ваши основные расходы были на продукты (1000 руб). Общий доход составил 5000 руб."
+      ]
+    },
+    "data": {
+      "type": "object",
+      "description": "Структурированные данные анализа",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "totalIncome": {
+              "type": "number",
+              "description": "Общий доход",
+              "examples": [5000]
+            },
+            "totalExpense": {
+              "type": "number",
+              "description": "Общий расход",
+              "examples": [1000]
+            },
+            "balance": {
+              "type": "number",
+              "description": "Баланс (доход - расход)",
+              "examples": [4000]
+            }
+          },
+          "required": ["totalIncome", "totalExpense", "balance"],
+          "description": "Сводка по финансам"
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Список рекомендаций",
+          "examples": [
+            ["Рекомендуем увеличить сбережения", "Рассмотрите возможность инвестирования"]
+          ]
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Название категории",
+                "examples": ["Продукты"]
+              },
+              "amount": {
+                "type": "number",
+                "description": "Сумма",
+                "examples": [1000]
+              },
+              "percentage": {
+                "type": "number",
+                "description": "Процент от общей суммы",
+                "examples": [100]
+              }
+            },
+            "required": ["name", "amount", "percentage"]
+          },
+          "description": "Список категорий с расходами",
+          "examples": [[{ "name": "Продукты", "amount": 1000, "percentage": 100 }]]
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Метаданные ответа",
+      "properties": {
+        "processingTime": {
+          "type": "number",
+          "description": "Время обработки запроса в секундах",
+          "examples": [0.5]
+        },
+        "modelVersion": {
+          "type": "string",
+          "description": "Версия модели AI",
+          "examples": ["1.0"]
+        },
+        "tokenCount": {
+          "type": "number",
+          "description": "Количество использованных токенов",
+          "examples": [150]
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания ответа",
+      "examples": ["2023-01-31T12:00:00Z"]
+    }
+  }
+}

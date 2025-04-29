@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Document",
+  "description": "Документ в системе",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "userId",
+    "title",
+    "description",
+    "type",
+    "status",
+    "fileUrl",
+    "fileSize",
+    "fileType",
+    "fileName",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Уникальный идентификатор документа",
+      "examples": ["1", "a1b2c3d4"]
+    },
+    "userId": {
+      "type": "string",
+      "description": "Идентификатор владельца документа",
+      "examples": ["user1"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Название документа",
+      "examples": ["Договор кредита"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание документа",
+      "examples": ["Кредитный договор №123-456"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["contract", "invoice", "receipt", "report", "certificate", "id", "other"],
+      "description": "Тип документа",
+      "examples": ["contract", "invoice", "receipt"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "archived", "pending", "rejected", "expired"],
+      "description": "Статус документа",
+      "examples": ["active", "archived", "pending"]
+    },
+    "fileUrl": {
+      "type": "string",
+      "description": "URL файла документа",
+      "examples": ["https://example.com/files/contract.pdf"]
+    },
+    "fileSize": {
+      "type": "number",
+      "description": "Размер файла в байтах",
+      "examples": [1024000]
+    },
+    "fileType": {
+      "type": "string",
+      "description": "MIME-тип файла",
+      "examples": ["application/pdf", "image/jpeg"]
+    },
+    "fileName": {
+      "type": "string",
+      "description": "Имя файла",
+      "examples": ["contract.pdf"]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги документа",
+      "examples": [["кредит", "договор", "банк"]]
+    },
+    "entityId": {
+      "type": "string",
+      "description": "Идентификатор связанной сущности",
+      "examples": ["loan1"]
+    },
+    "entityType": {
+      "type": "string",
+      "description": "Тип связанной сущности",
+      "examples": ["loan", "account", "transaction"]
+    },
+    "validFrom": {
+      "type": "string",
+      "description": "Дата начала действия документа",
+      "examples": ["2023-01-01"]
+    },
+    "validUntil": {
+      "type": "string",
+      "description": "Дата окончания действия документа",
+      "examples": ["2025-01-01"]
+    },
+    "issuedBy": {
+      "type": "string",
+      "description": "Кем выдан документ",
+      "examples": ["Сбербанк"]
+    },
+    "issuedTo": {
+      "type": "string",
+      "description": "Кому выдан документ",
+      "examples": ["Иванов Иван Иванович"]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время создания документа",
+      "examples": ["2023-01-01T00:00:00Z"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата и время последнего обновления документа",
+      "examples": ["2023-01-01T00:00:00Z"]
+    }
+  }
+}
