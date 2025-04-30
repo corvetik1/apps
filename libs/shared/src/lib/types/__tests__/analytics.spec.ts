@@ -129,22 +129,22 @@ describe('Analytics типы', () => {
         },
         charts: {
           income: {
-            labels: ['Неделя 1', 'Неделя 2', 'Неделя 3', 'Неделя 4'],
+            labels: ['2023-01-01', '2023-01-02', '2023-01-03'],
             datasets: [
               {
                 label: 'Доходы',
-                data: [2000, 3000, 2500, 2500],
+                data: [1000, 1500, 2000],
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
               },
             ],
           },
           expense: {
-            labels: ['Неделя 1', 'Неделя 2', 'Неделя 3', 'Неделя 4'],
+            labels: ['2023-01-01', '2023-01-02', '2023-01-03'],
             datasets: [
               {
                 label: 'Расходы',
-                data: [1800, 2200, 2000, 2000],
+                data: [800, 1200, 1800],
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
               },
@@ -179,20 +179,17 @@ describe('Analytics типы', () => {
       expect(response.startDate).toBe('2023-01-01');
       expect(response.endDate).toBe('2023-01-31');
 
-      // Проверка метрик
-      expect(response.metrics.totalIncome).toBe(10000);
-      expect(response.metrics.totalExpense).toBe(8000);
-      expect(response.metrics.balance).toBe(2000);
+      // Проверяем метрики (с использованием optional chaining)
+      expect(response.metrics?.totalIncome).toBe(10000);
+      expect(response.metrics?.totalExpense).toBe(8000);
+      expect(response.metrics?.balance).toBe(2000);
 
-      // Проверка графиков
-      expect(response.charts.income.labels).toEqual([
-        'Неделя 1',
-        'Неделя 2',
-        'Неделя 3',
-        'Неделя 4',
-      ]);
-      expect(response.charts.expense.datasets[0].label).toBe('Расходы');
-      expect(response.charts.categories.datasets[0].data).toEqual([3000, 2000, 1500, 1500]);
+      // Проверяем графики (с использованием optional chaining)
+      expect(response.charts?.income.labels).toEqual(['2023-01-01', '2023-01-02', '2023-01-03']);
+      expect(response.charts?.income.datasets[0].data).toEqual([1000, 1500, 2000]);
+
+      expect(response.charts?.expense.datasets[0].label).toBe('Расходы');
+      expect(response.charts?.categories.datasets[0].data).toEqual([3000, 2000, 1500, 1500]);
     });
   });
 });

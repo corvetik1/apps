@@ -5,7 +5,7 @@ import {
   expectValidJsonSchema,
   expectStringProperty,
   expectNumberProperty,
-  expectEnumProperty,
+  // expectEnumProperty, // Не используется в этом файле
 } from './schema-test-utils';
 
 describe('Debit Card JSON Schema', () => {

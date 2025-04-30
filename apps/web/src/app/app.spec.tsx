@@ -9,8 +9,8 @@ test('should render successfully', () => {
   expect(heading).not.toBeNull();
 });
 
-test('should have a greeting as the title', () => {
+test('should have the platform name as the title', () => {
   const { container } = render(<App />);
   const heading = container.querySelector('h1');
-  expect(heading?.textContent?.toLowerCase().includes('welcome')).toBe(true);
+  expect(heading?.textContent?.toLowerCase().includes('финансовая')).toBe(true);
 });

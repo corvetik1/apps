@@ -1,0 +1,149 @@
+/**
+ * Тесты для декораторов валидации
+ */
+
+import { BadRequestException, ExecutionContext } from '@nestjs/common';
+import { ValidateBody, ValidateQuery, ValidateParams } from '../validate.decorator';
+import { ValidationError, validate } from '@finance-platform/shared';
+
+// Мокируем функцию валидации
+jest.mock('@finance-platform/shared', () => ({
+  ValidationError: jest.fn().mockImplementation(function(this: Record<string, unknown>, message: string) {
+    this.message = message;
+    this.toResponse = jest.fn().mockReturnValue({ message });
+    return this;
+  }),
+  validate: jest.fn(),
+}));
+
+// Мокируем NestJS
+jest.mock('@nestjs/common', () => {
+  const original = jest.requireActual('@nestjs/common');
+  
+  // Сохраняем последнюю фабричную функцию для тестирования
+  let lastFactory: Function;
+  
+  return {
+    ...original,
+    createParamDecorator: (factory: Function) => {
+      lastFactory = factory;
+      return () => ({
+        // Метод для тестов, чтобы получить доступ к фабричной функции
+        __getFactory: () => lastFactory
+      });
+    }
+  };
+});
+
+describe('Декораторы валидации', () => {
+  // Схема для тестов
+  const testSchema = { type: 'object', properties: { name: { type: 'string' } } };
+  
+  // Мок для ExecutionContext
+  const executionContext: ExecutionContext = {
+    switchToHttp: jest.fn().mockReturnValue({
+      getRequest: jest.fn().mockReturnValue({
+        body: { name: 'Test' },
+        query: { filter: 'active' },
+        params: { id: '1' },
+      }),
+    }),
+    getArgs: jest.fn(),
+    getArgByIndex: jest.fn(),
+    switchToRpc: jest.fn(),
+    switchToWs: jest.fn(),
+    getType: jest.fn(),
+    getClass: jest.fn(),
+    getHandler: jest.fn(),
+  };
+  
+  // Мок для validate
+  const validateMock = validate as jest.Mock;
+  
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // По умолчанию validate просто возвращает то, что в него передали
+    validateMock.mockImplementation((schema, data) => data);
+  });
+
+  describe('ValidateBody', () => {
+    it('должен валидировать тело запроса', () => {
+      // Получаем декоратор и его фабричную функцию
+      const decorator = ValidateBody(testSchema);
+      const factory = (decorator as any).__getFactory();
+      
+      // Вызываем фабричную функцию с контекстом
+      const result = factory(undefined, executionContext);
+      
+      // Проверяем результат
+      expect(result).toEqual({ name: 'Test' });
+      expect(validateMock).toHaveBeenCalledWith(testSchema, { name: 'Test' });
+    });
+    
+    it('должен выбрасывать BadRequestException при ошибке валидации', () => {
+      // Мокаем ошибку валидации
+      validateMock.mockImplementation(() => {
+        throw new ValidationError('Validation failed');
+      });
+
+      // Получаем декоратор и его фабричную функцию
+      const decorator = ValidateBody(testSchema);
+      const factory = (decorator as any).__getFactory();
+      
+      // Проверяем, что выбрасывается ошибка
+      expect(() => {
+        factory(undefined, executionContext);
+      }).toThrow(BadRequestException);
+    });
+  });
+  
+  describe('ValidateQuery', () => {
+    it('должен валидировать параметры запроса', () => {
+      const decorator = ValidateQuery(testSchema);
+      const factory = (decorator as any).__getFactory();
+      
+      const result = factory(undefined, executionContext);
+      
+      expect(result).toEqual({ filter: 'active' });
+      expect(validateMock).toHaveBeenCalledWith(testSchema, { filter: 'active' });
+    });
+    
+    it('должен выбрасывать BadRequestException при ошибке валидации', () => {
+      validateMock.mockImplementation(() => {
+        throw new ValidationError('Validation failed');
+      });
+
+      const decorator = ValidateQuery(testSchema);
+      const factory = (decorator as any).__getFactory();
+      
+      expect(() => {
+        factory(undefined, executionContext);
+      }).toThrow(BadRequestException);
+    });
+  });
+  
+  describe('ValidateParams', () => {
+    it('должен валидировать параметры URL', () => {
+      const decorator = ValidateParams(testSchema);
+      const factory = (decorator as any).__getFactory();
+      
+      const result = factory(undefined, executionContext);
+      
+      expect(result).toEqual({ id: '1' });
+      expect(validateMock).toHaveBeenCalledWith(testSchema, { id: '1' });
+    });
+    
+    it('должен выбрасывать BadRequestException при ошибке валидации', () => {
+      validateMock.mockImplementation(() => {
+        throw new ValidationError('Validation failed');
+      });
+
+      const decorator = ValidateParams(testSchema);
+      const factory = (decorator as any).__getFactory();
+      
+      expect(() => {
+        factory(undefined, executionContext);
+      }).toThrow(BadRequestException);
+    });
+  });
+});
