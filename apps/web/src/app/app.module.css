@@ -6,6 +6,16 @@
   padding: 20px;
   color: #333;
   line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Стили для страницы */
+.page {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 /* Стили для хедера */

@@ -37,6 +37,9 @@ export default [
       '**/*.mjs',
     ],
     // Override or add rules here
-    rules: {},
+    rules: {
+      // Отключаем предупреждения о использовании типа any
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
 ];

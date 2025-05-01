@@ -3,6 +3,7 @@ export * from './lib/shared';
 
 // Экспортируем типы
 export * from './lib/types/user';
+export * from './lib/types/auth';
 export * from './lib/types/account';
 export * from './lib/types/transaction';
 export * from './lib/types/tender';
@@ -11,10 +12,11 @@ export * from './lib/types/investment';
 export * from './lib/types/analytics';
 
 // Экспортируем модули валидации
-// Исключаем ValidationErrorItem для избежания дублирования
 export { validate, validateWithErrors, isValid } from './lib/utils/validation';
 export { createBaseJsonSchema } from './lib/utils/json-schema';
-export { ValidationError, ValidationErrorItem } from './lib/errors/validation-error';
+// Экспортируем ValidationError и ValidationErrorItem из отдельных файлов
+export { ValidationError } from './lib/errors/validation-error';
+export { ValidationErrorItem } from './lib/errors/validation-error-item';
 export {
   clearSchemaCache,
   getSchemaCacheSize,
@@ -34,3 +36,12 @@ export * from './lib/utils/mapping/user-with-transactions.mapper';
 
 // Экспортируем модули ошибок
 export * from './lib/errors/validation-error';
+
+// Экспортируем схемы
+export { createUserSchema, updateUserSchema } from './lib/schemas/user';
+export {
+  loginSchema,
+  authResponseSchema,
+  refreshTokenSchema,
+  sessionInfoSchema,
+} from './lib/schemas/auth';

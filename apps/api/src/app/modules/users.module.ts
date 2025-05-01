@@ -9,7 +9,7 @@ import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { UsersController } from '../controllers/users.controller';
 import { UsersService } from '../services/users.service';
 import { ValidationMiddleware } from '../middleware/validation.middleware';
-import { createUserSchema, updateUserSchema } from '@finance-platform/shared/lib/schemas/user';
+import { createUserSchema, updateUserSchema } from '@finance-platform/shared';
 
 /**
  * Модуль для работы с пользователями
@@ -28,12 +28,12 @@ export class UsersModule {
   configure(consumer: MiddlewareConsumer) {
     // Валидация тела запроса при создании пользователя
     consumer
-      .apply(ValidationMiddleware.create({ schema: createUserSchema }))
+      .apply(ValidationMiddleware.create({ schema: createUserSchema, target: 'body' }))
       .forRoutes({ path: 'v1/users', method: RequestMethod.POST });
 
     // Валидация тела запроса при обновлении пользователя
     consumer
-      .apply(ValidationMiddleware.create({ schema: updateUserSchema }))
+      .apply(ValidationMiddleware.create({ schema: updateUserSchema, target: 'body' }))
       .forRoutes({ path: 'v1/users/:id', method: RequestMethod.PUT });
   }
 }

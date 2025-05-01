@@ -6,17 +6,8 @@
  */
 
 import { ValidationError } from '../errors/validation-error';
+import { ValidationErrorItem } from '../errors/validation-error-item';
 import { getValidator } from './validation/schema-cache';
-
-/**
- * Интерфейс для ошибки валидации
- */
-export interface ValidationErrorItem {
-  /** Путь к свойству с ошибкой */
-  path: string;
-  /** Сообщение об ошибке */
-  message: string;
-}
 
 /**
  * Валидирует данные по JSON-схеме

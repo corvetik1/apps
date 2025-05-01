@@ -1,3 +1,10 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from '../store';
+import { LoginPage } from '../auth/pages/LoginPage';
+import { ProtectedRoute } from './ProtectedRoute';
+import { ForbiddenPage } from './pages/ForbiddenPage';
+import { DashboardPage } from './pages/DashboardPage';
 import styles from './app.module.css';
 
 /**
@@ -7,25 +14,47 @@ import styles from './app.module.css';
  */
 export function App() {
   return (
-    <div className={styles.container}>
+    <Provider store={store}>
+      <Router>
+        <div className={styles.container}>
+          <Routes>
+            {/* Публичные маршруты */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forbidden" element={<ForbiddenPage />} />
+
+            {/* Защищенные маршруты */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+            </Route>
+
+            {/* Перенаправление на страницу входа для неизвестных маршрутов */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </Provider>
+  );
+}
+
+/**
+ * Компонент главной страницы
+ */
+function HomePage() {
+  return (
+    <div className={styles.page}>
       <header className={styles.header}>
         <h1>Финансовая платформа</h1>
-        <p>Текущий этап: MVP-0 (Каркас)</p>
+        <p>Текущий этап: MVP-1 (Аутентификация)</p>
       </header>
 
       <main className={styles.main}>
         <section className={styles.infoSection}>
           <h2>Добро пожаловать!</h2>
           <p>
-            Это начальная версия финансовой платформы. В дальнейшем здесь будет реализована
-            функциональность аутентификации, управления пользователями, тендерами и финансами.
+            Вы успешно вошли в систему. Здесь будет реализована функциональность управления
+            пользователями, тендерами и финансами.
           </p>
-          <button
-            className={styles.button}
-            onClick={() => alert('Приветствуем вас в финансовой платформе!')}
-          >
-            Приветствие
-          </button>
         </section>
 
         <section className={styles.roadmapSection}>

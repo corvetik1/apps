@@ -9,7 +9,11 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 // Импортируем интерфейсы и типы
-import { User, UserResponseDto } from '@finance-platform/shared/lib/types/user';
+import {
+  User,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  UserResponseDto,
+} from '@finance-platform/shared/lib/types/user';
 
 // Импортируем мапперы
 import { UserMapper } from '@finance-platform/shared/lib/utils/mapping/user.mapper';

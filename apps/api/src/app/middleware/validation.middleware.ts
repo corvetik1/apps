@@ -36,13 +36,16 @@ export interface ValidationOptions {
 @Injectable()
 export class ValidationMiddleware implements NestMiddleware {
   /**
-   * Создает экземпляр middleware с указанными опциями
+   * Создает функцию middleware с указанными опциями
    *
    * @param options Опции валидации
-   * @returns Middleware для валидации запросов
+   * @returns Функция middleware для валидации запросов
    */
   static create(options: ValidationOptions) {
-    return new ValidationMiddleware(options);
+    const middleware = new ValidationMiddleware(options);
+    return (req: Request, res: Response, next: NextFunction) => {
+      middleware.use(req, res, next);
+    };
   }
 
   /**
@@ -74,13 +77,10 @@ export class ValidationMiddleware implements NestMiddleware {
       // Используем безопасный подход для изменения свойств запроса
       // Примечание: использование any необходимо, так как свойства Request из Express являются только для чтения
       if (target === 'body') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).body = validatedData;
       } else if (target === 'query') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).query = validatedData;
       } else if (target === 'params') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).params = validatedData;
       }
 

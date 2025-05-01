@@ -180,6 +180,146 @@
 - ⬜ Balance calculation
 - ⬜ /v1/finance/accounts
 
+## Типизация тестов
+
+В проекте реализованы решения для корректной типизации тестов с использованием Jest и Testing Library.
+
+### 1. Мокирование функций API
+
+Для корректной типизации мок-функций используется следующий подход:
+
+```typescript
+// Определение типа функции
+type LoginMutation = (args: LoginArgs) => Promise<AuthResponse>;
+
+// Мокирование с корректной типизацией
+const mockLoginMutation: jest.MockedFunction<LoginMutation> = jest.fn();
+```
+
+Ключевые особенности:
+
+- Использование `jest.MockedFunction<T>` для корректной типизации моков
+- Явное определение типов для аргументов и возвращаемых значений
+- Аннотация типов вместо приведения типов с круглыми скобками
+
+### 2. Матчеры Testing Library
+
+Для корректной работы матчеров из `@testing-library/jest-dom` реализованы следующие решения:
+
+1. **Явный импорт в тестовых файлах:**
+
+   ```typescript
+   import '@testing-library/jest-dom';
+   ```
+
+2. **Расширение типов в `testing-library-jest-dom.d.ts`:**
+
+   ```typescript
+   declare module '@jest/expect' {
+     interface Matchers<R, T = unknown> {
+       toBeInTheDocument(): R;
+       toBeDisabled(): R;
+       toHaveTextContent(text: string | RegExp): R;
+     }
+   }
+   ```
+
+3. **Указание типов в `tsconfig.json`:**
+
+   ```json
+   {
+     "compilerOptions": {
+       "types": ["jest", "@testing-library/jest-dom", "node"]
+     }
+   }
+   ```
+
+4. **Прагматичный подход с приведением типов:**
+
+   ```typescript
+   // Для обхода проблем с типизацией в тестах
+   (expect(screen.getByText('Финансовая платформа')) as any).toBeInTheDocument();
+   ```
+
+Этот подход обеспечивает работоспособность тестов без изменения их логики, при этом решая проблемы с типизацией.
+
+### 3. Прагматичный подход к тестированию RTK Query
+
+Тестирование кода, использующего RTK Query, представляет собой особую сложность из-за сложной типизации и структуры хуков. В проекте реализован прагматичный подход к тестированию RTK Query, который обеспечивает стабильность тестов и упрощает их поддержку.
+
+#### Основные принципы мокирования RTK Query
+
+1. **Использование `jest.spyOn` вместо `jest.mock`**:
+
+   ```typescript
+   // Плохо: создает проблемы с типами
+   jest.mock('../../../api/authApi', () => ({
+     useLoginMutation: jest.fn(),
+   }));
+
+   // Хорошо: работает стабильно и поддерживает типы
+   jest.spyOn(authApi, 'useLoginMutation').mockImplementation(() => mockLoginHook);
+   ```
+
+2. **Прагматичное использование `any` для моков**:
+
+   ```typescript
+   // Создаем простые моки с использованием any
+   const mockLoginTrigger: any = jest.fn(() => Promise.resolve({ data: mockAuthResponse }));
+   const mockLoginHook: any = [mockLoginTrigger, { isLoading: false, reset: jest.fn() }];
+   ```
+
+3. **Использование `mockImplementation` вместо `mockResolvedValue`**:
+
+   ```typescript
+   // Вместо этого (create типы)
+   mockLoginFn.mockResolvedValue({ data: mockAuthResponse });
+
+   // Используем это
+   mockLoginFn.mockImplementation(() => Promise.resolve({ data: mockAuthResponse }));
+   ```
+
+4. **Связывание глобальных и локальных моков**:
+
+   ```typescript
+   // Глобальные моки для RTK Query хуков
+   const mockLoginTrigger: any = jest.fn();
+   const mockLoginHook: any = [mockLoginTrigger, { isLoading: false, reset: jest.fn() }];
+
+   describe('useAuth', () => {
+     // Локальные моки для проверки в тестах
+     const mockLoginMutation: any = jest.fn();
+
+     beforeAll(() => {
+       // Связываем глобальный мок с локальным
+       mockLoginTrigger.mockImplementation((...args) => {
+         // Перенаправляем вызов на локальный мок
+         mockLoginMutation(...args);
+         return Promise.resolve({ data: mockAuthResponse });
+       });
+
+       // Мокируем хук RTK Query
+       jest.spyOn(authApi, 'useLoginMutation').mockImplementation(() => mockLoginHook);
+     });
+
+     // Теперь в тестах можно проверять вызовы mockLoginMutation
+     it('login должен вызывать API', async () => {
+       expect(mockLoginMutation).toHaveBeenCalledWith({
+         email: 'test@example.com',
+         password: 'password123',
+       });
+     });
+   });
+   ```
+
+#### Преимущества прагматичного подхода
+
+1. **Устойчивость к обновлениям RTK Query** - при обновлении библиотеки не потребуется менять тесты.
+
+2. **Упрощенная поддержка** - нет необходимости разбираться в сложных типах RTK Query при написании или обновлении тестов.
+
+3. **Фокус на логике, а не на типах** - мы тестируем поведение приложения, а не строгость типов (это задача TypeScript при компиляции).
+
 ## Блоки разработки
 
 - ✅ **Блок A**: Подготовка окружения (Vite/Vitest/ESLint/Husky/Storybook)

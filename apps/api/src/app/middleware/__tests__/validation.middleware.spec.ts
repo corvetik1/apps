@@ -104,14 +104,12 @@ describe('ValidationMiddleware', () => {
   it('должен использовать body по умолчанию, если target не указан', () => {
     const middleware = new ValidationMiddleware({ schema });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const privateOptions = (middleware as any).options;
     expect(privateOptions.target).toBe('body');
   });
 
   it('должен валидировать данные и вызывать next', () => {
     const middleware = new ValidationMiddleware(options);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     middleware.use(req as any, res as any, next as any);
 
     expect(mockValidate).toHaveBeenCalledWith(schema, { name: 'John' });
@@ -123,7 +121,6 @@ describe('ValidationMiddleware', () => {
     mockValidate.mockReturnValue(validatedData);
 
     const middleware = new ValidationMiddleware(options);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     middleware.use(req as any, res as any, next as any);
 
     expect(req.body).toBe(validatedData);
@@ -134,7 +131,6 @@ describe('ValidationMiddleware', () => {
       schema,
       target: 'query',
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     middleware.use(req as any, res as any, next as any);
 
     expect(mockValidate).toHaveBeenCalledWith(schema, { search: 'test' });
@@ -145,7 +141,6 @@ describe('ValidationMiddleware', () => {
       schema,
       target: 'params',
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     middleware.use(req as any, res as any, next as any);
 
     expect(mockValidate).toHaveBeenCalledWith(schema, { id: '123' });
@@ -162,7 +157,6 @@ describe('ValidationMiddleware', () => {
     });
 
     const middleware = new ValidationMiddleware(options);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     middleware.use(req as any, res as any, next as any);
 
     expect(res.status).toHaveBeenCalledWith(400);
@@ -179,7 +173,6 @@ describe('ValidationMiddleware', () => {
     });
 
     const middleware = new ValidationMiddleware(options);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     middleware.use(req as any, res as any, next as any);
 
     expect(next).toHaveBeenCalledWith(error);
@@ -189,6 +182,9 @@ describe('ValidationMiddleware', () => {
 
   it('должен создаваться статическим методом create', () => {
     const middleware = ValidationMiddleware.create(options);
-    expect(middleware).toBeInstanceOf(ValidationMiddleware);
+    // Проверяем, что middleware является функцией
+    expect(typeof middleware).toBe('function');
+    // Проверяем, что функция принимает 3 аргумента (req, res, next)
+    expect(middleware.length).toBe(3);
   });
 });

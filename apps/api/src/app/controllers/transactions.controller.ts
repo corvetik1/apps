@@ -9,15 +9,24 @@ import {
   Controller,
   Get,
   Post,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Put,
   Delete,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Body,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Param,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import {
+  ApiTags,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ApiOperation,
+} from '@nestjs/swagger';
+import {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Transaction,
   CreateTransactionDto,
   TransactionResponseDto,
@@ -29,6 +38,7 @@ import { TransactionsService } from '../services/transactions.service';
 
 // Импортируем JSON-схемы
 import {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   transactionSchema,
   createTransactionSchema,
   transactionResponseSchema,

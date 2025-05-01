@@ -9,7 +9,11 @@ export default {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../../coverage/apps/web',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts', '<rootDir>/src/jest-setup.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/setupTests.ts',
+    '<rootDir>/src/jest-setup.ts',
+    '<rootDir>/jest.setup.js',
+  ],
   testPathIgnorePatterns: ['/node_modules/'],
   globals: {
     'ts-jest': {

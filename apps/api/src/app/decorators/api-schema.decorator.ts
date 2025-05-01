@@ -11,7 +11,9 @@ import {
   ApiOkResponse,
   ApiCreatedResponse,
   ApiOperation,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getSchemaPath,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ApiExtraModels,
   ApiProperty,
   ApiPropertyOptions,
