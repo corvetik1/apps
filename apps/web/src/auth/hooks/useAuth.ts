@@ -19,14 +19,33 @@ import {
   selectUser,
   selectUserRole,
   selectPermissions,
+  selectAuthError,
 } from '../../store/slices/authSlice';
 import {
   useLoginMutation,
   useLogoutMutation,
   useRefreshTokenMutation,
-  getErrorMessage,
 } from '../../api/authApi';
+
+// Вспомогательная функция для получения текста ошибки
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  return typeof error === 'string' ? error : 'Произошла неизвестная ошибка';
+};
 import { LoginRequest, Role } from '@finance-platform/shared';
+
+// Определяем тип ответа аутентификации локально
+interface AuthResponse {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: Role;
+  };
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
 
 /**
  * Хук для работы с аутентификацией
@@ -38,6 +57,7 @@ export const useAuth = () => {
   const user = useSelector(selectUser);
   const role = useSelector(selectUserRole);
   const permissions = useSelector(selectPermissions);
+  const error = useSelector(selectAuthError);
 
   // RTK Query хуки
   const [loginMutation] = useLoginMutation();
@@ -51,7 +71,7 @@ export const useAuth = () => {
     async (credentials: LoginRequest) => {
       try {
         dispatch(loginStart());
-        const response = await loginMutation(credentials).unwrap();
+        const response = await loginMutation(credentials).unwrap() as AuthResponse;
         dispatch(loginSuccess(response));
 
         // Сохраняем токены в localStorage, если включена опция "запомнить меня"
@@ -78,17 +98,17 @@ export const useAuth = () => {
   const logout = useCallback(async () => {
     try {
       if (isAuthenticated) {
-        await logoutMutation();
+        await logoutMutation({}).unwrap();
       }
-    } catch (error) {
-      console.error('Ошибка при выходе из системы:', error);
-    } finally {
+
       // Удаляем токены из хранилища
       localStorage.removeItem('refreshToken');
       sessionStorage.removeItem('refreshToken');
 
-      // Очищаем состояние
+      // Обновляем состояние в Redux
       dispatch(logoutAction());
+    } catch (error) {
+      console.error('Ошибка при выходе из системы:', error);
     }
   }, [dispatch, isAuthenticated, logoutMutation]);
 
@@ -97,16 +117,16 @@ export const useAuth = () => {
    */
   const refreshToken = useCallback(async () => {
     try {
-      // Получаем refreshToken из localStorage или sessionStorage
+      // Получаем refreshToken из хранилища
       const storedRefreshToken =
         localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
 
       if (!storedRefreshToken) {
-        throw new Error('Токен обновления не найден');
+        throw new Error('Отсутствует refreshToken');
       }
 
       dispatch(refreshTokenStart());
-      const response = await refreshTokenMutation({ refreshToken: storedRefreshToken }).unwrap();
+      const response = await refreshTokenMutation({ refreshToken: storedRefreshToken }).unwrap() as AuthResponse;
       dispatch(refreshTokenSuccess(response));
 
       // Обновляем токен в хранилище
@@ -120,13 +140,9 @@ export const useAuth = () => {
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       dispatch(refreshTokenFailure(errorMessage));
-
-      // Если не удалось обновить токен, выходим из системы
-      logout();
-
       throw new Error(errorMessage);
     }
-  }, [dispatch, refreshTokenMutation, logout]);
+  }, [dispatch, refreshTokenMutation]);
 
   /**
    * Проверка, имеет ли пользователь указанную роль
@@ -165,7 +181,7 @@ export const useAuth = () => {
     role,
     permissions,
     isLoading: auth.isLoading,
-    error: auth.error,
+    error,
 
     // Методы
     login,

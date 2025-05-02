@@ -69,7 +69,7 @@ const defineAbilitiesFor = (user: any): MockAppAbility => {
 // Функция для проверки разрешений
 const hasPermission = (user: any, action: Action, subject: Subject, resource?: any): boolean => {
   const ability = defineAbilitiesFor(user);
-  return ability.can(action, resource ? resource : subject);
+  return ability.can(action, subject, resource);
 };
 
 // Локальное определение ролей для тестов
