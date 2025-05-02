@@ -170,14 +170,27 @@ export const {
 export const authReducer = authSlice.reducer;
 
 // Селекторы
+import { createSelector } from '@reduxjs/toolkit';
+
 export const selectAuth = (state: RootState) => state.auth;
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
-export const selectUser = (state: RootState) => ({
-  id: state.auth.userId,
-  email: state.auth.email,
-  name: state.auth.name,
-  role: state.auth.role,
-});
+
+// Мемоизированный селектор пользователя с помощью createSelector
+export const selectUser = createSelector(
+  [
+    (state: RootState) => state.auth.userId,
+    (state: RootState) => state.auth.email,
+    (state: RootState) => state.auth.name,
+    (state: RootState) => state.auth.role,
+  ],
+  (id, email, name, role) => ({
+    id,
+    email,
+    name,
+    role,
+  }),
+);
+
 export const selectUserRole = (state: RootState) => state.auth.role;
 export const selectPermissions = (state: RootState) => state.auth.permissions;
 export const selectAuthError = (state: RootState) => state.auth.error;

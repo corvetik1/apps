@@ -59,23 +59,57 @@ const mockAuthResponse: AuthResponse = {
  * Используем простые моки и any для обхода сложной типизации RTK Query
  */
 
-// Мок-функции для мутаций
-const mockLoginTrigger: any = jest.fn(() => Promise.resolve({ data: mockAuthResponse }));
-const mockLogoutTrigger: any = jest.fn(() => Promise.resolve({ data: undefined }));
-const mockRefreshTrigger: any = jest.fn(() => Promise.resolve({ data: mockAuthResponse }));
+/**
+ * Прагматичный подход к тестированию RTK Query
+ * Создаем локальные и глобальные моки, используя прагматичный подход с any
+ */
 
-// Состояние для мутаций
-const mutationState: any = {
-  isLoading: false,
-  reset: jest.fn(),
-  originalArgs: undefined,
-};
+// Локальные моки для использования в тестах
+// Используем прагматичный подход с any для мок-функций
+const mockLoginMutation: jest.Mock = jest.fn();
+const mockLogoutMutation: jest.Mock = jest.fn();
+const mockRefreshTokenMutation: jest.Mock = jest.fn();
+
+// Глобальные моки для RTK Query API
+const mockLoginTrigger: any = jest.fn();
+const mockLogoutTrigger: any = jest.fn();
+const mockRefreshTrigger: any = jest.fn();
+
+// Связываем глобальные моки с локальными для возможности проверки вызовов
+mockLoginTrigger.mockImplementation((...args) => {
+  // Записываем вызов в локальный мок для проверки в тестах
+  mockLoginMutation(...args);
+  // Возвращаем объект с методом unwrap для совместимости с реальным кодом
+  return {
+    unwrap: () => Promise.resolve(mockAuthResponse),
+  };
+});
+
+mockLogoutTrigger.mockImplementation((...args) => {
+  mockLogoutMutation(...args);
+  return {
+    unwrap: () => Promise.resolve({}),
+  };
+});
+
+mockRefreshTrigger.mockImplementation((...args) => {
+  mockRefreshTokenMutation(...args);
+  return {
+    unwrap: () => Promise.resolve(mockAuthResponse),
+  };
+});
 
 // Моки для хуков RTK Query
-const mockLoginHook: any = [mockLoginTrigger, mutationState];
-const mockLogoutHook: any = [mockLogoutTrigger, mutationState];
-const mockRefreshHook: any = [mockRefreshTrigger, mutationState];
+const mockLoginHook: any = [mockLoginTrigger, { isLoading: false, reset: jest.fn() }];
+const mockLogoutHook: any = [mockLogoutTrigger, { isLoading: false, reset: jest.fn() }];
+const mockRefreshHook: any = [mockRefreshTrigger, { isLoading: false, reset: jest.fn() }];
 
+// Мокируем хуки RTK Query с помощью jest.spyOn
+jest.spyOn(authApi, 'useLoginMutation').mockImplementation(() => mockLoginHook);
+jest.spyOn(authApi, 'useLogoutMutation').mockImplementation(() => mockLogoutHook);
+jest.spyOn(authApi, 'useRefreshTokenMutation').mockImplementation(() => mockRefreshHook);
+
+// Мокируем вспомогательную функцию
 // Мок для вспомогательной функции
 const mockGetErrorMessage = jest.fn(
   (error: any) => (error && error.message) || 'Неизвестная ошибка',
@@ -83,10 +117,7 @@ const mockGetErrorMessage = jest.fn(
 // Это позволит избежать проблем с jest.mock на уровне модуля
 
 describe('useAuth', () => {
-  // Мок-функции для тестов - используются непосредственно в тестах
-  const mockLoginMutation: any = jest.fn();
-  const mockLogoutMutation: any = jest.fn();
-  const mockRefreshTokenMutation: any = jest.fn();
+  // Используем локальные моки, определенные в глобальном контексте
 
   // Настройка хранилища Redux
   const createTestStore = (initialState = {}) => {
@@ -167,8 +198,15 @@ describe('useAuth', () => {
   });
 
   it('должен успешно выполнять вход', async () => {
-    // Настраиваем мок для успешного входа
-    mockLoginMutation.mockResolvedValue(mockAuthResponse);
+    // Настраиваем моки для успешного входа, используя прагматичный подход
+    mockLoginMutation.mockClear();
+    // Настраиваем unwrap метод для возврата нужных данных
+    mockLoginTrigger.mockImplementation((...args) => {
+      mockLoginMutation(...args);
+      return {
+        unwrap: () => Promise.resolve(mockAuthResponse),
+      };
+    });
 
     const { result } = renderAuthHook();
 
@@ -202,8 +240,14 @@ describe('useAuth', () => {
   });
 
   it('должен сохранять токен в sessionStorage, если rememberMe=false', async () => {
-    // Настраиваем мок для успешного входа
-    mockLoginMutation.mockResolvedValue(mockAuthResponse);
+    // Настраиваем моки для успешного входа
+    mockLoginMutation.mockClear();
+    mockLoginTrigger.mockImplementation((...args) => {
+      mockLoginMutation(...args);
+      return {
+        unwrap: () => Promise.resolve(mockAuthResponse),
+      };
+    });
 
     const { result } = renderAuthHook();
 
@@ -224,7 +268,13 @@ describe('useAuth', () => {
   it('должен обрабатывать ошибки входа', async () => {
     // Настраиваем мок для ошибки входа
     const errorMessage = 'Неверный email или пароль';
-    mockLoginMutation.mockRejectedValue(new Error(errorMessage));
+    mockLoginMutation.mockClear();
+    mockLoginTrigger.mockImplementation((...args) => {
+      mockLoginMutation(...args);
+      return {
+        unwrap: () => Promise.reject(new Error(errorMessage)),
+      };
+    });
 
     const { result } = renderAuthHook();
 
@@ -344,7 +394,13 @@ describe('useAuth', () => {
 
   it('должен успешно обновлять токен', async () => {
     // Настраиваем мок для успешного обновления токена
-    mockRefreshTokenMutation.mockResolvedValue(mockAuthResponse);
+    mockRefreshTokenMutation.mockClear();
+    mockRefreshTrigger.mockImplementation((...args) => {
+      mockRefreshTokenMutation(...args);
+      return {
+        unwrap: () => Promise.resolve(mockAuthResponse),
+      };
+    });
 
     // Сохраняем токен в localStorage
     localStorage.setItem('refreshToken', 'old-refresh-token');
@@ -368,7 +424,13 @@ describe('useAuth', () => {
   it('должен обрабатывать ошибки обновления токена', async () => {
     // Настраиваем мок для ошибки обновления токена
     const errorMessage = 'Недействительный токен обновления';
-    mockRefreshTokenMutation.mockRejectedValue(new Error(errorMessage));
+    mockRefreshTokenMutation.mockClear();
+    mockRefreshTrigger.mockImplementation((...args) => {
+      mockRefreshTokenMutation(...args);
+      return {
+        unwrap: () => Promise.reject(new Error(errorMessage)),
+      };
+    });
 
     // Сохраняем токен в localStorage
     localStorage.setItem('refreshToken', 'invalid-refresh-token');

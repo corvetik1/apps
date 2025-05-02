@@ -51,11 +51,25 @@ const mockAuthResponse = {
  * Работаем с простыми мок-функциями без сложной типизации
  */
 
-// Мок-функция для мутации логина
-const mockLoginFn: any = jest.fn();
+// Создаем локальную мок-функцию для использования в тестах
+const mockLoginMutation = jest.fn();
+
+// Создаем глобальную мок-функцию для RTK Query с методом unwrap
+const mockLoginTrigger: any = jest.fn();
+
+// Связываем глобальный мок с локальным
+mockLoginTrigger.mockImplementation((...args) => {
+  // Вызываем локальную мок-функцию для записи вызовов
+  mockLoginMutation(...args);
+
+  // Возвращаем объект с методом unwrap
+  return {
+    unwrap: () => Promise.resolve(mockAuthResponse),
+  };
+});
 
 // Мок для хука RTK Query
-const mockLoginHook: any = [mockLoginFn, { isLoading: false, reset: jest.fn() }];
+const mockLoginHook: any = [mockLoginTrigger, { isLoading: false, reset: jest.fn() }];
 
 // Мок для вспомогательной функции
 const mockGetErrorMessage = jest.fn(
@@ -127,8 +141,10 @@ describe('LoginPage - интеграционные тесты', () => {
   });
 
   it('должен отправлять форму с правильными данными', async () => {
-    // Настраиваем мок для успешного входа - используем прагматичный подход в тестах
-    mockLoginFn.mockImplementation(() => Promise.resolve({ data: mockAuthResponse }));
+    // Сбрасываем счетчик вызовов мока перед тестом
+    mockLoginMutation.mockClear();
+
+    // Не нужно переопределять mockLoginTrigger здесь, так как он уже настроен в глобальной настройке
 
     render(<TestApp />);
 
@@ -148,7 +164,7 @@ describe('LoginPage - интеграционные тесты', () => {
 
     // Проверяем, что метод API был вызван с правильными параметрами
     await waitFor(() => {
-      expect(mockLoginFn).toHaveBeenCalledWith({
+      expect(mockLoginMutation).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'password123',
         rememberMe: true,
@@ -172,7 +188,17 @@ describe('LoginPage - интеграционные тесты', () => {
   it('должен отображать ошибку аутентификации', async () => {
     // Настраиваем мок для ошибки входа
     const errorMessage = 'Неверный email или пароль';
-    mockLoginFn.mockImplementation(() => Promise.reject(new Error(errorMessage)));
+
+    // Сбрасываем счетчик вызовов мока перед тестом
+    mockLoginMutation.mockClear();
+
+    // Переопределяем метод unwrap для возврата ошибки
+    mockLoginTrigger.mockImplementation((...args) => {
+      mockLoginMutation(...args); // Сохраняем вызов в локальном моке
+      return {
+        unwrap: () => Promise.reject(new Error(errorMessage)),
+      };
+    });
 
     render(<TestApp />);
 
@@ -195,8 +221,16 @@ describe('LoginPage - интеграционные тесты', () => {
   });
 
   it('должен перенаправлять на главную страницу после успешного входа', async () => {
-    // Настраиваем мок для успешного входа - используем прагматичный подход в тестах
-    mockLoginFn.mockImplementation(() => Promise.resolve({ data: mockAuthResponse }));
+    // Сбрасываем счетчик вызовов мока перед тестом
+    mockLoginMutation.mockClear();
+
+    // Возвращаем исходную имплементацию для успешного входа
+    mockLoginTrigger.mockImplementation((...args) => {
+      mockLoginMutation(...args); // Сохраняем вызов в локальном моке
+      return {
+        unwrap: () => Promise.resolve(mockAuthResponse),
+      };
+    });
 
     render(<TestApp />);
 
@@ -220,7 +254,14 @@ describe('LoginPage - интеграционные тесты', () => {
 
   it('должен перенаправлять на указанную страницу после успешного входа', async () => {
     // Настраиваем мок для успешного входа - используем прагматичный подход в тестах
-    mockLoginFn.mockImplementation(() => Promise.resolve({ data: mockAuthResponse }));
+    // Сбрасываем моки и настраиваем их для текущего теста
+    mockLoginMutation.mockClear();
+    mockLoginTrigger.mockImplementation((...args) => {
+      mockLoginMutation(...args);
+      return {
+        unwrap: () => Promise.resolve(mockAuthResponse),
+      };
+    });
 
     // Устанавливаем начальный путь с параметром from
     render(
@@ -247,7 +288,9 @@ describe('LoginPage - интеграционные тесты', () => {
 
   it('должен отображать кнопку в состоянии загрузки', async () => {
     // Настраиваем мок для состояния загрузки
-    (authApi.useLoginMutation as any).mockReturnValue([mockLoginFn, { isLoading: true }]);
+    jest
+      .spyOn(authApi, 'useLoginMutation')
+      .mockImplementation(() => [mockLoginTrigger, { isLoading: true, reset: jest.fn() }]);
 
     render(<TestApp />);
 
