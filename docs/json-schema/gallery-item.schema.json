@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Элемент галереи",
+  "description": "Схема для элемента галереи медиа-файлов",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "mediaType",
+    "mimeType",
+    "size",
+    "url",
+    "status",
+    "uploadedBy",
+    "uploadedAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Уникальный идентификатор элемента"
+    },
+    "name": {
+      "type": "string",
+      "description": "Название элемента"
+    },
+    "description": {
+      "type": ["string", "null"],
+      "description": "Описание элемента"
+    },
+    "mediaType": {
+      "type": "string",
+      "enum": ["image", "document", "video", "audio"],
+      "description": "Тип медиа-файла"
+    },
+    "mimeType": {
+      "type": "string",
+      "description": "MIME-тип файла"
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Размер файла в байтах"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL для доступа к файлу"
+    },
+    "thumbnailUrl": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "URL для доступа к миниатюре (для изображений и видео)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["uploading", "processing", "active", "archived", "deleted"],
+      "description": "Статус элемента"
+    },
+    "tags": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "string"
+      },
+      "description": "Теги для категоризации"
+    },
+    "metadata": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "description": "Метаданные файла (зависит от типа файла)"
+    },
+    "entityId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Идентификатор связанной сущности"
+    },
+    "entityType": {
+      "type": ["string", "null"],
+      "description": "Тип связанной сущности"
+    },
+    "uploadedBy": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Идентификатор пользователя, загрузившего файл"
+    },
+    "uploadedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата загрузки"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата последнего обновления"
+    }
+  },
+  "additionalProperties": false
+}

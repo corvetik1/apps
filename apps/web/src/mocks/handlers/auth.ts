@@ -5,11 +5,11 @@
  * включая вход, выход и обновление токена.
  */
 
-import { rest } from 'msw';
+import { http, HttpResponse, delay as mswDelay } from 'msw';
 import { Role } from '@finance-platform/shared';
 import { db } from '../db';
 import { API_URL } from '../constants';
-import { generateToken, delay } from '../utils';
+import { generateToken } from '../utils';
 
 /**
  * Обработчики для эндпоинтов аутентификации
@@ -18,24 +18,26 @@ export const authHandlers = [
   /**
    * Обработчик для входа в систему
    */
-  rest.post(`${API_URL}/auth/login`, async (req, res, ctx) => {
+  http.post(`${API_URL}/auth/login`, async ({ request }) => {
     // Имитация задержки сети
-    await delay();
+    await mswDelay();
 
     // Получаем данные из запроса
-    const { email, password } = await req.json();
+    const { email, password } = await request.json() as { email: string; password: string };
 
     // Проверяем наличие обязательных полей
     if (!email || !password) {
-      return res(
-        ctx.status(400),
-        ctx.json({
+      return HttpResponse.json(
+        {
           message: 'Email и пароль обязательны',
-          errors: {
-            email: !email ? ['Email обязателен'] : [],
-            password: !password ? ['Пароль обязателен'] : [],
-          },
-        }),
+          errors: [
+            {
+              path: !email ? 'email' : 'password',
+              message: !email ? 'Email обязателен' : 'Пароль обязателен',
+            },
+          ],
+        },
+        { status: 400 }
       );
     }
 
@@ -50,11 +52,11 @@ export const authHandlers = [
 
     // Если пользователь не найден или пароль неверный
     if (!user || user.password !== password) {
-      return res(
-        ctx.status(401),
-        ctx.json({
+      return HttpResponse.json(
+        {
           message: 'Неверный email или пароль',
-        }),
+        },
+        { status: 401 }
       );
     }
 
@@ -63,9 +65,8 @@ export const authHandlers = [
     const refreshToken = generateToken({ userId: user.id }, '7d');
 
     // Формируем ответ
-    return res(
-      ctx.status(200),
-      ctx.json({
+    return HttpResponse.json(
+      {
         user: {
           id: user.id,
           email: user.email,
@@ -75,43 +76,44 @@ export const authHandlers = [
         accessToken,
         refreshToken,
         expiresIn: 3600, // 1 час
-      }),
+      },
+      { status: 200 }
     );
   }),
 
   /**
    * Обработчик для выхода из системы
    */
-  rest.post(`${API_URL}/auth/logout`, async (req, res, ctx) => {
+  http.post(`${API_URL}/auth/logout`, async () => {
     // Имитация задержки сети
-    await delay();
+    await mswDelay();
 
     // В реальном приложении здесь будет логика для инвалидации токена
-    return res(
-      ctx.status(200),
-      ctx.json({
+    return HttpResponse.json(
+      {
         message: 'Выход выполнен успешно',
-      }),
+      },
+      { status: 200 }
     );
   }),
 
   /**
    * Обработчик для обновления токена
    */
-  rest.post(`${API_URL}/auth/refresh`, async (req, res, ctx) => {
+  http.post(`${API_URL}/auth/refresh`, async ({ request }) => {
     // Имитация задержки сети
-    await delay();
+    await mswDelay();
 
     // Получаем данные из запроса
-    const { refreshToken } = await req.json();
+    const { refreshToken } = await request.json() as { refreshToken: string };
 
     // Проверяем наличие токена
     if (!refreshToken) {
-      return res(
-        ctx.status(400),
-        ctx.json({
+      return HttpResponse.json(
+        {
           message: 'Токен обновления обязателен',
-        }),
+        },
+        { status: 400 }
       );
     }
 
@@ -119,14 +121,16 @@ export const authHandlers = [
     // и получение информации о пользователе из него
 
     // Для мока просто берем первого пользователя
-    const user = db.user.findFirst();
+    const user = db.user.findFirst({
+      where: {}
+    });
 
     if (!user) {
-      return res(
-        ctx.status(401),
-        ctx.json({
+      return HttpResponse.json(
+        {
           message: 'Недействительный токен обновления',
-        }),
+        },
+        { status: 401 }
       );
     }
 
@@ -135,9 +139,8 @@ export const authHandlers = [
     const newRefreshToken = generateToken({ userId: user.id }, '7d');
 
     // Формируем ответ
-    return res(
-      ctx.status(200),
-      ctx.json({
+    return HttpResponse.json(
+      {
         user: {
           id: user.id,
           email: user.email,
@@ -147,26 +150,27 @@ export const authHandlers = [
         accessToken,
         refreshToken: newRefreshToken,
         expiresIn: 3600, // 1 час
-      }),
+      },
+      { status: 200 }
     );
   }),
 
   /**
    * Обработчик для получения информации о текущей сессии
    */
-  rest.get(`${API_URL}/auth/session`, async (req, res, ctx) => {
+  http.get(`${API_URL}/auth/session`, async ({ request }) => {
     // Имитация задержки сети
-    await delay();
+    await mswDelay();
 
     // Получаем токен из заголовка
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = request.headers.get('Authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res(
-        ctx.status(401),
-        ctx.json({
+      return HttpResponse.json(
+        {
           message: 'Не авторизован',
-        }),
+        },
+        { status: 401 }
       );
     }
 
@@ -174,14 +178,16 @@ export const authHandlers = [
     // и получение информации о пользователе из него
 
     // Для мока просто берем первого пользователя
-    const user = db.user.findFirst();
+    const user = db.user.findFirst({
+      where: {}
+    });
 
     if (!user) {
-      return res(
-        ctx.status(401),
-        ctx.json({
+      return HttpResponse.json(
+        {
           message: 'Не авторизован',
-        }),
+        },
+        { status: 401 }
       );
     }
 
@@ -199,39 +205,28 @@ export const authHandlers = [
         ];
         break;
       case Role.Manager:
-        permissions = [
-          'users:read',
-          'users:create',
-          'users:update',
-          'accounts:manage',
-          'transactions:manage',
-          'tenders:manage',
-        ];
+        permissions = ['accounts:view', 'transactions:manage', 'tenders:manage'];
         break;
       case Role.User:
-        permissions = [
-          'users:read:own',
-          'users:update:own',
-          'accounts:read',
-          'transactions:create',
-          'transactions:read:own',
-          'tenders:read',
-        ];
+        permissions = ['accounts:view', 'transactions:view', 'tenders:view'];
         break;
-      case Role.Guest:
-        permissions = ['reports:read:public', 'dashboards:read:public'];
-        break;
+      default:
+        permissions = [];
     }
 
     // Формируем ответ
-    return res(
-      ctx.status(200),
-      ctx.json({
-        userId: user.id,
-        role: user.role,
-        permissions,
-        expiresAt: Date.now() + 3600000, // Текущее время + 1 час
-      }),
+    return HttpResponse.json(
+      {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          departmentId: user.departmentId,
+          permissions,
+        },
+      },
+      { status: 200 }
     );
   }),
 ];

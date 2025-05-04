@@ -9,7 +9,10 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
 
 // Базовый URL API
-const API_BASE_URL = process.env.NX_API_URL || 'http://localhost:3333/api/v1';
+// Используем import.meta.env вместо process.env для Vite
+import { getApiUrl } from '../utils/env';
+
+const API_BASE_URL = getApiUrl();
 
 /**
  * Базовый API-клиент с RTK Query

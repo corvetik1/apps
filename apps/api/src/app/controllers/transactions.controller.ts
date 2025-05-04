@@ -26,25 +26,43 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Transaction,
   CreateTransactionDto,
   TransactionResponseDto,
-} from '@finance-platform/shared/lib/types/transaction';
-import { TransformInterceptor } from '../interceptors/transform.interceptor';
+} from '@finance-platform/shared';
+import { TransformInterceptor } from '../interceptors/array-transform.interceptor';
 import { ValidateBody, ValidateParams, ValidateQuery } from '../decorators/validate.decorator';
 import { ApiJsonBody, ApiJsonResponse, ApiJsonOperation } from '../decorators/api-schema.decorator';
 import { TransactionsService } from '../services/transactions.service';
 
 // Импортируем JSON-схемы
-import {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  transactionSchema,
-  createTransactionSchema,
-  transactionResponseSchema,
-  idParamsSchema,
-  transactionQuerySchema,
-} from '@finance-platform/shared/lib/schemas/transaction';
+import { transactionSchema } from '@finance-platform/shared';
+
+// Временные схемы для валидации
+const createTransactionSchema = transactionSchema;
+const transactionResponseSchema = transactionSchema;
+
+// Временные схемы для валидации
+const idParamsSchema = {
+  type: 'object',
+  required: ['id'],
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+  },
+};
+
+const transactionQuerySchema = {
+  type: 'object',
+  properties: {
+    accountId: { type: 'string', format: 'uuid' },
+    startDate: { type: 'string', format: 'date-time' },
+    endDate: { type: 'string', format: 'date-time' },
+    type: { type: 'string', enum: ['income', 'expense', 'transfer'] },
+    category: { type: 'string' },
+    minAmount: { type: 'number' },
+    maxAmount: { type: 'number' },
+    status: { type: 'string', enum: ['pending', 'completed', 'failed', 'cancelled'] },
+  },
+};
 
 /**
  * Интерфейс для параметров запроса транзакций
@@ -86,7 +104,7 @@ export class TransactionsController {
   @ApiJsonResponse(transactionResponseSchema, { isArray: true })
   @UseInterceptors(
     new TransformInterceptor({
-      mapper: TransactionsService.transactionMapper,
+      mapper: (data) => data,
       isArray: true,
     }),
   )
@@ -110,13 +128,13 @@ export class TransactionsController {
   @ApiJsonResponse(transactionResponseSchema)
   @UseInterceptors(
     new TransformInterceptor({
-      mapper: TransactionsService.transactionMapper,
+      mapper: (data) => data,
     }),
   )
   async findById(
     @ValidateParams(idParamsSchema) params: IdParams,
   ): Promise<TransactionResponseDto> {
-    return this.transactionsService.findById(params.id);
+    return this.transactionsService.findOne(params.id);
   }
 
   /**
@@ -134,7 +152,7 @@ export class TransactionsController {
   @ApiJsonResponse(transactionResponseSchema, { status: 201 })
   @UseInterceptors(
     new TransformInterceptor({
-      mapper: TransactionsService.transactionMapper,
+      mapper: (data) => data,
     }),
   )
   async create(
@@ -157,10 +175,11 @@ export class TransactionsController {
   @ApiJsonResponse(transactionResponseSchema)
   @UseInterceptors(
     new TransformInterceptor({
-      mapper: TransactionsService.transactionMapper,
+      mapper: (data) => data,
     }),
   )
-  async remove(@ValidateParams(idParamsSchema) params: IdParams): Promise<TransactionResponseDto> {
-    return this.transactionsService.remove(params.id);
+  async remove(@ValidateParams(idParamsSchema) params: IdParams): Promise<void> {
+    await this.transactionsService.remove(params.id);
+    return;
   }
 }

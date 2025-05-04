@@ -5,7 +5,7 @@
  * в контроллерах NestJS с использованием JSON-схем.
  */
 
-import { ExecutionContext, BadRequestException, createParamDecorator } from '@nestjs/common';
+import { ExecutionContext, BadRequestException, createParamDecorator, UsePipes } from '@nestjs/common';
 import { validate, ValidationError } from '@finance-platform/shared';
 
 /**
@@ -82,3 +82,36 @@ export const createValidateParamsFactory =
  */
 export const ValidateParams = (schema: Record<string, unknown>) =>
   createParamDecorator(createValidateParamsFactory(schema))();
+
+/**
+ * Декоратор метода для валидации тела запроса с использованием JSON Schema.
+ * @param schema - JSON Schema для валидации.
+ */
+export function Validate(schema: Record<string, unknown>) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    
+    descriptor.value = function (...args: any[]) {
+      // Находим индекс параметра с декоратором @Body()
+      const bodyIndex = Reflect.getMetadata('__bodyParam__index', target, propertyKey) || 0;
+      
+      // Получаем тело запроса
+      const body = args[bodyIndex];
+      
+      try {
+        // Валидируем тело запроса
+        validate(schema, body);
+        
+        // Если валидация прошла успешно, вызываем оригинальный метод
+        return originalMethod.apply(this, args);
+      } catch (error) {
+        if (error instanceof ValidationError) {
+          throw new BadRequestException(error.toResponse());
+        }
+        throw error;
+      }
+    };
+    
+    return descriptor;
+  };
+}

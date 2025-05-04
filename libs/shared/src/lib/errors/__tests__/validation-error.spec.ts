@@ -1,7 +1,8 @@
 /**
  * Тесты для класса ошибки валидации
  */
-import { ValidationError, ValidationErrorItem } from '../validation-error';
+import { ValidationError } from '../validation-error';
+import { ValidationErrorItem } from '../validation-error-item';
 
 describe('ValidationError', () => {
   const errorItems: ValidationErrorItem[] = [

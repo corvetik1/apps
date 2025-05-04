@@ -12,6 +12,8 @@ import { Role } from '../types/user';
  * Схема для валидации запроса на вход в систему
  */
 export const loginSchema = createBaseJsonSchema({
+  title: 'Login Request Schema',
+  description: 'Схема для валидации запроса на вход в систему',
   type: 'object',
   required: ['email', 'password'],
   properties: {
@@ -41,6 +43,8 @@ export const loginSchema = createBaseJsonSchema({
  * Схема для валидации ответа на успешную аутентификацию
  */
 export const authResponseSchema = createBaseJsonSchema({
+  title: 'Authentication Response Schema',
+  description: 'Схема для валидации ответа на запрос аутентификации',
   type: 'object',
   required: ['user', 'accessToken', 'refreshToken', 'expiresIn'],
   properties: {
@@ -101,6 +105,8 @@ export const authResponseSchema = createBaseJsonSchema({
  * Схема для валидации запроса на обновление токена
  */
 export const refreshTokenSchema = createBaseJsonSchema({
+  title: 'Refresh Token Schema',
+  description: 'Схема для валидации запроса на обновление токена',
   type: 'object',
   required: ['refreshToken'],
   properties: {
@@ -117,6 +123,8 @@ export const refreshTokenSchema = createBaseJsonSchema({
  * Схема для валидации информации о сессии
  */
 export const sessionInfoSchema = createBaseJsonSchema({
+  title: 'Session Info Schema',
+  description: 'Схема для валидации информации о сессии пользователя',
   type: 'object',
   required: ['userId', 'role', 'permissions', 'expiresAt'],
   properties: {

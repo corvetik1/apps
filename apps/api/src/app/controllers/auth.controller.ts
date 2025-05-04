@@ -12,12 +12,11 @@ import {
   AuthResponse,
   RefreshTokenRequest,
   SessionInfo,
-  AuthResponseDto,
-  SessionResponseDto,
 } from '@finance-platform/shared';
+import { AuthResponseDto, SessionResponseDto, LoginRequestDto, RefreshTokenRequestDto } from '../dto/auth.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Request } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { Validate } from '../decorators/validate.decorator';
 import { loginSchema, refreshTokenSchema } from '@finance-platform/shared';
 
@@ -43,10 +42,11 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Вход в систему' })
+  @ApiBody({ type: LoginRequestDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Успешный вход',
-    type: AuthResponseDto,
+    type: AuthResponseDto
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -85,10 +85,11 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Обновление токена' })
+  @ApiBody({ type: RefreshTokenRequestDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Успешное обновление токена',
-    type: AuthResponseDto,
+    type: AuthResponseDto
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -112,7 +113,7 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Информация о сессии',
-    type: SessionResponseDto,
+    type: SessionResponseDto
   })
   async getSession(@Req() req: Request): Promise<SessionInfo> {
     const user = req.user as { id: string };

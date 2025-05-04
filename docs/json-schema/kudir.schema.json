@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Операция КУДиР",
+  "description": "Схема для операции в книге учета доходов и расходов",
+  "type": "object",
+  "required": [
+    "id",
+    "date",
+    "type",
+    "status",
+    "documentNumber",
+    "description",
+    "amount",
+    "taxRate",
+    "taxAmount",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Уникальный идентификатор операции"
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата операции"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["income", "expense"],
+      "description": "Тип операции (доход или расход)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "completed", "cancelled"],
+      "description": "Статус операции"
+    },
+    "documentNumber": {
+      "type": "string",
+      "description": "Номер документа"
+    },
+    "description": {
+      "type": "string",
+      "description": "Содержание операции"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Сумма операции"
+    },
+    "taxRate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Налоговая ставка (в процентах)"
+    },
+    "taxAmount": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Сумма налога"
+    },
+    "counterpartyId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Идентификатор контрагента"
+    },
+    "createdBy": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Идентификатор пользователя, создавшего операцию"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата создания"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Дата последнего обновления"
+    }
+  },
+  "additionalProperties": false
+}

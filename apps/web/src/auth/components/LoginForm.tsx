@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { LoginRequest } from '@finance-platform/shared';
 import styles from '../auth.module.css';
+import { isProduction, isTest } from '../../utils/env';
 
 /**
  * Свойства компонента формы входа
@@ -101,7 +102,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       }
     } catch (error) {
       // Ошибка обрабатывается в хуке useAuth
-      console.error('Ошибка входа:', error);
+      // Используем тихий логгер в продакшене и обычный в разработке
+      if (isProduction()) {
+        // В продакшене можно использовать сервис мониторинга ошибок
+        console.error('Ошибка входа:', error);
+      } else if (!isTest()) {
+        // В разработке показываем ошибку, но не в тестах
+        console.error('Ошибка входа:', error);
+      }
+      // В тестах не выводим ошибку в консоль
     }
   };
 

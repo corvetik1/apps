@@ -25,9 +25,17 @@ export class ValidationError extends Error {
    * @param message Общее сообщение об ошибке
    * @param errors Список конкретных ошибок валидации
    */
-  constructor(message: string, public readonly errors: ValidationErrorItem[]) {
+  constructor(message: string, public readonly errors: Array<ValidationErrorItem | { path: string; message: string }>) {
     super(message);
     this.name = 'ValidationError';
+
+    // Преобразуем объекты в экземпляры класса ValidationErrorItem
+    this.errors = errors.map(err => {
+      if (!(err instanceof ValidationErrorItem)) {
+        return new ValidationErrorItem(err.path, err.message);
+      }
+      return err;
+    }) as ValidationErrorItem[];
 
     // Для корректной работы instanceof в ES5
     Object.setPrototypeOf(this, ValidationError.prototype);

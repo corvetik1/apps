@@ -9,6 +9,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { authReducer } from './slices/authSlice';
 import { api } from '../api';
+import { isProduction } from '../utils/env';
 
 /**
  * Корневой Redux store приложения
@@ -19,7 +20,8 @@ export const store = configureStore({
     [api.reducerPath]: api.reducer,
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware().concat(api.middleware),
-  devTools: process.env.NODE_ENV !== 'production',
+  // Используем утилиту env для совместимости с Jest
+  devTools: !isProduction(),
 });
 
 // Настройка слушателей для RTK Query
