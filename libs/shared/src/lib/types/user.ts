@@ -24,6 +24,8 @@ export enum Role {
   User = 'user',
   /** Гость с ограниченным доступом */
   Guest = 'guest',
+  /** Бухгалтер с доступом к финансовым операциям */
+  Accountant = 'accountant',
 }
 
 /**

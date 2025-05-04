@@ -1,9 +1,9 @@
 /* Основные стили для контейнера приложения */
 .container {
   font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   color: #333;
   line-height: 1.6;
   min-height: 100vh;
@@ -11,11 +11,28 @@
   flex-direction: column;
 }
 
+/* Стили для контента с учетом меню */
+.appWithMenu {
+  margin-top: 56px;
+  margin-left: 0;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .appWithMenu {
+    margin-left: 250px;
+  }
+}
+
 /* Стили для страницы */
 .page {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 0;
 }
 
 /* Стили для хедера */

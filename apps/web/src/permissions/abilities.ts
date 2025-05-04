@@ -83,6 +83,29 @@ export const defineAbilitiesFor = (user: any): AppAbility => {
     return build();
   }
 
+  // Для бухгалтера - доступ к финансовым операциям и отчетам
+  if (user.role === Role.Accountant) {
+    // Бухгалтер может управлять финансовыми операциями
+    can(Action.Manage, Subject.Account);
+    can(Action.Manage, Subject.Transaction);
+    
+    // Бухгалтер может читать и создавать отчеты
+    can(Action.Read, Subject.Report);
+    can(Action.Create, Subject.Report);
+    can(Action.Update, Subject.Report);
+    
+    // Бухгалтер может читать дашборды
+    can(Action.Read, Subject.Dashboard);
+    
+    // Бухгалтер может читать информацию о пользователях
+    can(Action.Read, Subject.User);
+    
+    // Бухгалтер может читать информацию о тендерах
+    can(Action.Read, Subject.Tender);
+    
+    return build();
+  }
+
   // Для гостя - только чтение публичных отчетов и дашбордов
   if (user.role === Role.Guest) {
     can(Action.Read, Subject.Report, { isPublic: true } as any);

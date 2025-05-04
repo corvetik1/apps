@@ -5,6 +5,8 @@ import { LoginPage } from '../auth/pages/LoginPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ForbiddenPage } from './pages/ForbiddenPage';
 import { DashboardPage } from './pages/DashboardPage';
+import AppBarAndMenu from '../components/AppBarAndMenu';
+import { useAuth } from '../auth/hooks/useAuth';
 import styles from './app.module.css';
 
 /**
@@ -17,23 +19,55 @@ export function App() {
     <Provider store={store}>
       <Router>
         <div className={styles.container}>
-          <Routes>
-            {/* Публичные маршруты */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/forbidden" element={<ForbiddenPage />} />
-
-            {/* Защищенные маршруты */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-            </Route>
-
-            {/* Перенаправление на страницу входа для неизвестных маршрутов */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
+          <AppWithAuth />
         </div>
       </Router>
     </Provider>
+  );
+}
+
+/**
+ * Компонент с аутентификацией и меню
+ */
+function AppWithAuth() {
+  const { logout, isAuthenticated } = useAuth();
+  
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  return (
+    <>
+      {isAuthenticated && <AppBarAndMenu onLogout={handleLogout} />}
+      
+      <div className={isAuthenticated ? styles.appWithMenu : ''}>
+        <Routes>
+          {/* Публичные маршруты */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forbidden" element={<ForbiddenPage />} />
+
+          {/* Защищенные маршруты */}
+          <Route element={<ProtectedRoute />}>
+            {/* Главная страница */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            
+            {/* Основные модули */}
+            <Route path="/tenders" element={<PlaceholderPage title="Тендеры" />} />
+            <Route path="/analytics" element={<PlaceholderPage title="Аналитика" />} />
+            <Route path="/finance" element={<PlaceholderPage title="Финансы" />} />
+            <Route path="/investments" element={<PlaceholderPage title="Инвестиции" />} />
+            <Route path="/notes" element={<PlaceholderPage title="Заметки" />} />
+            <Route path="/gallery" element={<PlaceholderPage title="Галерея" />} />
+            <Route path="/admin" element={<PlaceholderPage title="Администрирование" />} />
+            <Route path="/profile" element={<PlaceholderPage title="Профиль пользователя" />} />
+          </Route>
+
+          {/* Перенаправление на страницу входа для неизвестных маршрутов */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
+    </>
   );
 }
 
@@ -45,7 +79,7 @@ function HomePage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <h1>Финансовая платформа</h1>
-        <p>Текущий этап: MVP-1 (Аутентификация)</p>
+        <p>Текущий этап: MVP-2 (Пользователи + роли)</p>
       </header>
 
       <main className={styles.main}>
@@ -82,6 +116,31 @@ function HomePage() {
       <footer className={styles.footer}>
         <p>&copy; 2025 Финансовая платформа</p>
       </footer>
+    </div>
+  );
+}
+
+/**
+ * Компонент-заглушка для страниц, которые будут реализованы позже
+ */
+function PlaceholderPage({ title }: { title: string }) {
+  return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <h1>{title}</h1>
+        <p>Страница в разработке</p>
+      </header>
+
+      <main className={styles.main}>
+        <div className={styles.card}>
+          <h2>Модуль "{title}" находится в разработке</h2>
+          <p>
+            Эта страница является заглушкой для будущего функционала.
+            В рамках текущего этапа MVP-2 (Пользователи + роли) реализуется
+            базовая структура приложения и система разрешений.
+          </p>
+        </div>
+      </main>
     </div>
   );
 }

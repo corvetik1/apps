@@ -1,7 +1,8 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
 import App from './app/app';
+import { store } from './store';
+import { authActions } from './store/slices/authSlice';
 
 /**
  * Инициализация и рендеринг приложения
@@ -13,19 +14,32 @@ import App from './app/app';
 // Используем асинхронную функцию для инициализации приложения
 async function startApp() {
   if (import.meta.env.VITE_USE_MOCKS === 'true') {
-    console.log('🔶 [MSW] Инициализация моков для разработки...');
+    console.log('🗦 [MSW] Инициализация моков для разработки...');
     const { worker } = await import('./mocks/browser');
-    await worker.start({ onUnhandledRequest: 'bypass' });
+    // Для MSW 2.x необходимо использовать правильные настройки
+    await worker.start({
+      onUnhandledRequest: 'bypass',
+      serviceWorker: {
+        url: '/mockServiceWorker.js',
+        options: {
+          // Указываем область видимости Service Worker
+          scope: '/',
+        },
+      },
+    }).catch(error => {
+      console.error('[MSW] Ошибка инициализации MSW:', error);
+    });
   }
+
+  // Восстанавливаем сессию из localStorage при загрузке приложения
+  store.dispatch(authActions.restoreSession());
 
   // Рендерим приложение
   const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
   
   root.render(
     <StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <App />
     </StrictMode>
   );
 

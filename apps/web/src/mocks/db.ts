@@ -185,6 +185,19 @@ export const seedDb = () => {
     createdAt: '2023-01-01T00:00:00Z',
     updatedAt: '2023-01-01T00:00:00Z',
   });
+  
+  // Добавляем пользователя с ролью бухгалтера
+  db.user.create({
+    id: '5',
+    email: 'accountant@example.com',
+    name: 'Бухгалтер',
+    password: 'finance456',
+    role: Role.Accountant,
+    departmentId: '3',
+    transactionLimit: 300000,
+    createdAt: '2023-01-01T00:00:00Z',
+    updatedAt: '2023-01-01T00:00:00Z',
+  });
 
   // Добавляем счета
   db.account.create({

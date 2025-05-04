@@ -74,6 +74,16 @@ const authSlice = createSlice({
      */
     loginSuccess: (state, action: PayloadAction<AuthResponse>) => {
       const { user, accessToken, refreshToken, expiresIn } = action.payload;
+      const expiresAt = Date.now() + expiresIn * 1000;
+
+      // Сохраняем данные в localStorage
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('expiresAt', expiresAt.toString());
+      localStorage.setItem('userId', user.id);
+      localStorage.setItem('email', user.email);
+      localStorage.setItem('name', user.name);
+      localStorage.setItem('role', user.role);
 
       state.isAuthenticated = true;
       state.userId = user.id;
@@ -82,7 +92,7 @@ const authSlice = createSlice({
       state.role = user.role as Role;
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
-      state.expiresAt = Date.now() + expiresIn * 1000;
+      state.expiresAt = expiresAt;
       state.isLoading = false;
       state.error = null;
     },
@@ -111,7 +121,16 @@ const authSlice = createSlice({
     /**
      * Выход из системы
      */
-    logout: state => {
+    logout: () => {
+      // Очищаем данные аутентификации из localStorage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('expiresAt');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('email');
+      localStorage.removeItem('name');
+      localStorage.removeItem('role');
+      
       return initialState;
     },
 
@@ -150,6 +169,46 @@ const authSlice = createSlice({
     clearError: state => {
       state.error = null;
     },
+    
+    /**
+     * Восстановление сессии из localStorage
+     */
+    restoreSession: state => {
+      const accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+      const expiresAtString = localStorage.getItem('expiresAt');
+      const userId = localStorage.getItem('userId');
+      const email = localStorage.getItem('email');
+      const name = localStorage.getItem('name');
+      const roleString = localStorage.getItem('role');
+      
+      // Проверяем, что все необходимые данные есть в localStorage
+      if (accessToken && refreshToken && expiresAtString && userId && email && name && roleString) {
+        const expiresAt = parseInt(expiresAtString, 10);
+        const role = roleString as Role;
+        
+        // Проверяем, что токен не истек
+        if (expiresAt > Date.now()) {
+          state.isAuthenticated = true;
+          state.userId = userId;
+          state.email = email;
+          state.name = name;
+          state.role = role;
+          state.accessToken = accessToken;
+          state.refreshToken = refreshToken;
+          state.expiresAt = expiresAt;
+        } else {
+          // Если токен истек, очищаем localStorage
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('expiresAt');
+          localStorage.removeItem('userId');
+          localStorage.removeItem('email');
+          localStorage.removeItem('name');
+          localStorage.removeItem('role');
+        }
+      }
+    },
   },
 });
 
@@ -164,7 +223,11 @@ export const {
   refreshTokenSuccess,
   refreshTokenFailure,
   clearError,
+  restoreSession,
 } = authSlice.actions;
+
+// Экспортируем действия как объект для удобства использования
+export const authActions = authSlice.actions;
 
 // Экспортируем редьюсер
 export const authReducer = authSlice.reducer;
