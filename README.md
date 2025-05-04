@@ -6,17 +6,18 @@
 
 ## Текущий статус
 
-### Текущий этап: MVP-0 (Каркас)
+### Текущий этап: MVP-2 (Пользователи + роли)
 
-Завершены работы по блоку A (Подготовка окружения):
+Завершены работы по блокам:
 
-- ✅ Настроен монорепозиторий на базе Nx Workspace
-- ✅ Настроены инструменты качества кода (ESLint, Prettier, Husky)
-- ✅ Настроено тестовое окружение (Jest, Testing Library)
-- ✅ Настроен MSW для моков API
-- ✅ Настроен CI/CD через GitHub Actions
-- ✅ Создана базовая документация
-- ✅ Реализованы инструменты для работы с JSON-схемами
+- ✅ **Блок A**: Подготовка окружения (Vite/Vitest/ESLint/Husky/Storybook)
+- ✅ **Блок B**: Типы и DTO (User ... AnalyticsRecord)
+- ✅ **Блок C**: State-менеджмент (RTK Query, Redux Toolkit)
+- ✅ **Блок D**: MSW-моки (JSON + handlers)
+- ✅ **Блок E**: Интеграционные тесты (FE)
+- ✅ **Блок F**: Юнит-тесты (FE)
+- ✅ **Блок H**: CI/CD Frontend
+- ✅ **Блок K**: Auth + RBAC/ABAC (частично)
 
 Репозиторий: [https://github.com/corvetik1/apps](https://github.com/corvetik1/apps)
 
@@ -30,16 +31,17 @@
 - ✅ CI с lint и базовыми тестами
 - ✅ Настройка окружения разработки
 
-### MVP-1: Аутентификация
+### MVP-1: Аутентификация (завершено)
 
-- ⬜ AuthSlice, authApi
-- ⬜ Login UI, ProtectedRoute
-- ⬜ MSW /v1/auth/\*
+- ✅ AuthSlice, authApi
+- ✅ Login UI, ProtectedRoute
+- ✅ MSW /v1/auth/\*
 
-### MVP-2: Пользователи + роли
+### MVP-2: Пользователи + роли (в процессе)
 
-- ⬜ UsersSlice, List view
-- ⬜ RBAC guard
+- ✅ UsersSlice
+- ✅ RBAC guard
+- ⬜ List view
 - ⬜ /v1/users
 
 ### MVP-3: Тендеры
@@ -180,7 +182,51 @@
 - ⬜ Balance calculation
 - ⬜ /v1/finance/accounts
 
-## Типизация тестов
+## Подходы к тестированию
+
+В проекте реализованы различные подходы к тестированию, обеспечивающие высокое покрытие кода и стабильность тестов.
+
+### 1. Функциональное тестирование с полным мокированием
+
+Для тестирования модулей с внешними зависимостями (например, CASL для управления правами доступа) используется подход функционального тестирования с полным мокированием:
+
+```typescript
+// 1. Импорты библиотек для тестирования
+import { describe, it, expect, jest } from '@jest/globals';
+
+// 2. Моки внешних зависимостей (до импорта тестируемых функций)
+jest.mock('@casl/ability', () => ({
+  createMongoAbility: jest.fn().mockImplementation(() => ({
+    can: jest.fn().mockReturnValue(true)
+  }))
+}));
+
+// 3. Импорт тестируемых функций
+import { defineAbilitiesFor, hasPermission } from '../abilities';
+
+// 4. Тесты, организованные по функциям
+describe('defineAbilitiesFor', () => {
+  it('должен создавать правильные разрешения для администратора', () => {
+    // Вызов функции
+    const result = defineAbilitiesFor({ role: 'admin' });
+    
+    // Проверка результата
+    expect(result).toBeDefined();
+    expect(result.can).toBeDefined();
+  });
+});
+```
+
+Преимущества этого подхода:
+
+- Тесты не зависят от деталей реализации
+- Легко поддерживать при изменениях в коде
+- Тесты выполняются быстро
+- Хорошее покрытие кода при минимальных усилиях
+
+Пример: `apps/web/src/permissions/__tests__/abilities.test.ts`
+
+### 2. Типизация тестов
 
 В проекте реализованы решения для корректной типизации тестов с использованием Jest и Testing Library.
 
@@ -420,20 +466,38 @@ const mockLoginMutation: jest.MockedFunction<LoginMutation> = jest.fn();
 
 ## Блоки разработки
 
+### Клиентская часть (Frontend)
+
+- Завершенные блоки
+
 - ✅ **Блок A**: Подготовка окружения (Vite/Vitest/ESLint/Husky/Storybook)
-- ⬜ **Блок B**: Типы и DTO (User ... AnalyticsRecord)
-- ⬜ **Блок C**: State-менеджмент (RTK Query, Redux Toolkit)
-- ⬜ **Блок D**: MSW-моки (JSON + handlers)
-- ⬜ **Блок E**: Интеграционные тесты (FE)
-- ⬜ **Блок F**: Юнит-тесты (FE)
+- ✅ **Блок B**: Типы и DTO (User ... AnalyticsRecord)
+- ✅ **Блок C**: State-менеджмент (RTK Query, Redux Toolkit)
+- ✅ **Блок D**: MSW-моки (JSON + handlers)
+- ✅ **Блок E**: Интеграционные тесты (FE)
+- ✅ **Блок F**: Юнит-тесты (FE)
+- ✅ **Блок H**: CI/CD Frontend
+- ✅ **Блок K**: Auth + RBAC/ABAC (частично, клиентская часть)
+
+- В процессе разработки
+
 - ⬜ **Блок G**: Storybook + Visual diff
-- ⬜ **Блок H**: CI/CD Frontend
+
+### Серверная часть (Backend)
+
+- В процессе разработки
+
 - ⬜ **Блок I**: Инициализация БД (Prisma, сиды)
 - ⬜ **Блок J**: NestJS-модули
-- ⬜ **Блок K**: Auth + RBAC/ABAC
+- ⬜ **Блок K**: Auth + RBAC/ABAC (серверная часть)
 - ⬜ **Блок L**: Внешние интеграции (AI, Analytics)
 - ⬜ **Блок M**: Тесты бэкенда
 - ⬜ **Блок N**: Docker + CI/CD Backend
+
+### Общие блоки
+
+- В процессе разработки
+
 - ⬜ **Блок O**: Безопасность + Мониторинг
 - ⬜ **Блок P**: Финальная интеграция
 
