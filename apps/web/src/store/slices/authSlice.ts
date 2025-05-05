@@ -9,6 +9,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Role, AuthResponse, SessionInfo } from '@finance-platform/shared';
 import { RootState } from '..';
 
+// Добавляем тип для селекторов
+type StateWithAuth = {
+  auth: AuthState;
+};
+
 /**
  * Интерфейс состояния аутентификации
  */
@@ -222,11 +227,11 @@ export const {
   refreshTokenStart,
   refreshTokenSuccess,
   refreshTokenFailure,
-  clearError,
   restoreSession,
+  clearError,
 } = authSlice.actions;
 
-// Экспортируем действия как объект для удобства использования
+// Экспортируем все действия как объект для удобства импорта
 export const authActions = authSlice.actions;
 
 // Экспортируем редьюсер
@@ -235,16 +240,16 @@ export const authReducer = authSlice.reducer;
 // Селекторы
 import { createSelector } from '@reduxjs/toolkit';
 
-export const selectAuth = (state: RootState) => state.auth;
-export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+export const selectAuth = (state: RootState & StateWithAuth) => state.auth;
+export const selectIsAuthenticated = (state: RootState & StateWithAuth) => state.auth.isAuthenticated;
 
 // Мемоизированный селектор пользователя с помощью createSelector
 export const selectUser = createSelector(
   [
-    (state: RootState) => state.auth.userId,
-    (state: RootState) => state.auth.email,
-    (state: RootState) => state.auth.name,
-    (state: RootState) => state.auth.role,
+    (state: RootState & StateWithAuth) => state.auth.userId,
+    (state: RootState & StateWithAuth) => state.auth.email,
+    (state: RootState & StateWithAuth) => state.auth.name,
+    (state: RootState & StateWithAuth) => state.auth.role,
   ],
   (id, email, name, role) => ({
     id,
@@ -254,7 +259,7 @@ export const selectUser = createSelector(
   }),
 );
 
-export const selectUserRole = (state: RootState) => state.auth.role;
-export const selectPermissions = (state: RootState) => state.auth.permissions;
-export const selectAuthError = (state: RootState) => state.auth.error;
-export const selectIsAuthLoading = (state: RootState) => state.auth.isLoading;
+export const selectUserRole = (state: RootState & StateWithAuth) => state.auth.role;
+export const selectPermissions = (state: RootState & StateWithAuth) => state.auth.permissions;
+export const selectAuthError = (state: RootState & StateWithAuth) => state.auth.error;
+export const selectIsAuthLoading = (state: RootState & StateWithAuth) => state.auth.isLoading;

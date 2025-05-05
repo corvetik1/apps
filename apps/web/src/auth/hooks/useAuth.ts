@@ -76,9 +76,13 @@ export const useAuth = () => {
 
         // Сохраняем токены в localStorage, если включена опция "запомнить меня"
         if (credentials.rememberMe) {
+          // Удаляем из sessionStorage, если там был токен
+          sessionStorage.removeItem('refreshToken');
           localStorage.setItem('refreshToken', response.refreshToken);
         } else {
           // Иначе сохраняем в sessionStorage (только на время сессии)
+          // Удаляем из localStorage, если там был токен
+          localStorage.removeItem('refreshToken');
           sessionStorage.setItem('refreshToken', response.refreshToken);
         }
 

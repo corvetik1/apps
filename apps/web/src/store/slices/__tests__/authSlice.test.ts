@@ -5,7 +5,14 @@
  * проверяя корректность работы редьюсеров и селекторов.
  */
 
-import { Role } from '@finance-platform/shared';
+// Используем мок для типа Role, так как в тестовом окружении может быть проблема с импортом из @finance-platform/shared
+enum Role {
+  Admin = 'admin',
+  Manager = 'manager',
+  User = 'user',
+  Guest = 'guest',
+  Accountant = 'accountant'
+}
 import {
   authReducer,
   loginStart,
