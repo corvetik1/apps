@@ -1,5 +1,5 @@
 /**
- * Настройка Jest для совместимости с Vite
+ * Настройка Jest для совместимости с Vite и MSW 2.x
  */
 
 // Глобальные переменные для тестов
@@ -53,4 +53,38 @@ jest.spyOn(console, 'warn').mockImplementation((message) => {
   // Для остальных предупреждений сохраняем стандартное поведение
   console.warn(message);
 });
+
+// Полифилл для BroadcastChannel, необходимый для MSW 2.x
+class BroadcastChannelPolyfill {
+  constructor(channel) {
+    this.channel = channel;
+    this.listeners = [];
+  }
+
+  postMessage(message) {
+    // Имитация отправки сообщения
+    this.listeners.forEach(listener => {
+      listener({ data: message });
+    });
+  }
+
+  addEventListener(type, listener) {
+    if (type === 'message') {
+      this.listeners.push(listener);
+    }
+  }
+
+  removeEventListener(type, listener) {
+    if (type === 'message') {
+      this.listeners = this.listeners.filter(l => l !== listener);
+    }
+  }
+
+  close() {
+    this.listeners = [];
+  }
+}
+
+// Добавляем BroadcastChannel в глобальный объект
+global.BroadcastChannel = BroadcastChannelPolyfill;
 

@@ -6,6 +6,11 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "@jest/globals": "^29.0.0",
+    "@nestjs/common": "^10.0.0",
+    "glob": "11.0.2",
+    "ajv": "^8.0.0",
+    "ajv-formats": "3.0.1"
   }
 }

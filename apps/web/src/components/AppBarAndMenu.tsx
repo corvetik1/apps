@@ -78,6 +78,7 @@ const AppBarAndMenu: React.FC<AppBarAndMenuProps> = React.memo(({ onLogout }) =>
     notes: 'Заметки',
     gallery: 'Галерея',
     admin: 'Админка',
+    users: 'Пользователи',
     profile: 'Профиль',
     logout: 'Выйти',
   };
@@ -149,7 +150,14 @@ const AppBarAndMenu: React.FC<AppBarAndMenuProps> = React.memo(({ onLogout }) =>
         path: '/admin', 
         icon: faUserCog, 
         pageId: 'admin',
-        visible: role === Role.Admin
+        visible: role === Role.Admin || role === Role.Manager
+      },
+      { 
+        label: t.users, 
+        path: '/admin/users', 
+        icon: faUser, 
+        pageId: 'admin-users',
+        visible: role === Role.Admin || role === Role.Manager
       },
     ];
     
