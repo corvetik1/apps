@@ -17,7 +17,7 @@ import { api } from './index';
  * API-клиент для аутентификации
  */
 export const authApi = api.injectEndpoints({
-  endpoints: (builder: any) => ({
+  endpoints: (builder) => ({
     /**
      * Вход в систему
      */
@@ -27,7 +27,7 @@ export const authApi = api.injectEndpoints({
         method: 'POST',
         body: credentials,
       }),
-      invalidatesTags: ['Auth'],
+      invalidatesTags: [{ type: 'Auth', id: 'SESSION' }],
     }),
 
     /**
@@ -38,7 +38,7 @@ export const authApi = api.injectEndpoints({
         url: '/auth/logout',
         method: 'POST',
       }),
-      invalidatesTags: ['Auth'],
+      invalidatesTags: [{ type: 'Auth', id: 'SESSION' }],
     }),
 
     /**
@@ -50,7 +50,7 @@ export const authApi = api.injectEndpoints({
         method: 'POST',
         body: refreshData,
       }),
-      invalidatesTags: ['Auth'],
+      invalidatesTags: [{ type: 'Auth', id: 'SESSION' }],
     }),
 
     /**
@@ -58,7 +58,7 @@ export const authApi = api.injectEndpoints({
      */
     getSession: builder.query<SessionInfo, void>({
       query: () => '/auth/session',
-      providesTags: ['Auth'],
+      providesTags: [{ type: 'Auth', id: 'SESSION' }],
     }),
   }),
 });

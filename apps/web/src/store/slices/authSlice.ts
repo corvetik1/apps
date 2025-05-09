@@ -17,7 +17,7 @@ type StateWithAuth = {
 /**
  * Интерфейс состояния аутентификации
  */
-interface AuthState {
+export interface AuthState {
   /** Флаг аутентификации пользователя */
   isAuthenticated: boolean;
   /** Идентификатор пользователя */

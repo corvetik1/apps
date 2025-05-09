@@ -5,11 +5,14 @@
  */
 
 import { authHandlers } from './auth';
+// Импортируем обработчики для пользователей
+import { usersHandlers } from './users';
 
 /**
  * Все обработчики MSW
  */
 export const handlers = [
   ...authHandlers,
+  ...usersHandlers,
   // Здесь будут добавляться другие обработчики
 ];
