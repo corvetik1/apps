@@ -5,37 +5,37 @@
  * включая вход, выход и обновление токена.
  */
 
-import { describe, it, expect, jest } from '@jest/globals';
-import { api } from '../index';
-import { authApi } from '../authApi';
+import { store } from '../../store';
+import { authApi, LoginRequest, AuthResponse, UserProfile } from '../authApi';
+import { api } from '../index'; // Добавляем этот импорт
 
 // Мокируем RTK Query API
-jest.mock('../index', () => ({
+vi.mock('../index', () => ({
   api: {
     reducerPath: 'api',
-    injectEndpoints: jest.fn(() => ({
+    injectEndpoints: vi.fn(() => ({
       endpoints: {
         login: {
-          initiate: jest.fn(),
-          useLoginMutation: jest.fn(),
+          initiate: vi.fn(),
+          useLoginMutation: vi.fn(),
         },
         logout: {
-          initiate: jest.fn(),
-          useLogoutMutation: jest.fn(),
+          initiate: vi.fn(),
+          useLogoutMutation: vi.fn(),
         },
         refreshToken: {
-          initiate: jest.fn(),
-          useRefreshTokenMutation: jest.fn(),
+          initiate: vi.fn(),
+          useRefreshTokenMutation: vi.fn(),
         },
         getSession: {
-          initiate: jest.fn(),
-          useGetSessionQuery: jest.fn(),
+          initiate: vi.fn(),
+          useGetSessionQuery: vi.fn(),
         },
       },
-      useLoginMutation: jest.fn(),
-      useLogoutMutation: jest.fn(),
-      useRefreshTokenMutation: jest.fn(),
-      useGetSessionQuery: jest.fn(),
+      useLoginMutation: vi.fn(),
+      useLogoutMutation: vi.fn(),
+      useRefreshTokenMutation: vi.fn(),
+      useGetSessionQuery: vi.fn(),
     })),
   },
 }));

@@ -1,3 +1,5 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+
 /**
  * Тесты для API-клиента пользователей
  *
@@ -5,10 +7,12 @@
  * включая получение списка, создание, обновление и удаление.
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { store } from '../../store';
+// User type is used in usersApi.ts, ensure it's available or adjust if User is not directly used in tests
+// import { User } from '../usersApi'; 
 
 // Мокируем типы и константы из shared
-jest.mock('@finance-platform/shared', () => ({
+vi.mock('@finance-platform/shared', () => ({
   Role: {
     Admin: 'admin',
     Manager: 'manager',
@@ -17,326 +21,229 @@ jest.mock('@finance-platform/shared', () => ({
   }
 }));
 
-// Создаем моки для функций builder и хуков
-const mockQueryFn = jest.fn();
-const mockMutationFn = jest.fn();
-const mockProvidesTags = jest.fn();
-const mockInvalidatesTags = jest.fn();
-const mockUseGetUsersQuery = jest.fn();
-const mockUseGetUserByIdQuery = jest.fn();
-const mockUseCreateUserMutation = jest.fn();
-const mockUseUpdateUserMutation = jest.fn();
-const mockUseDeleteUserMutation = jest.fn();
+// Используем vi.hoisted для переменных, которые должны быть доступны в vi.mock фабрике
+const { mockBuilder, mockApiInstance, mockBuilderQuery, mockBuilderMutation } = vi.hoisted(() => {
+  const mockBuilderQuery = vi.fn(config => config);
+  const mockBuilderMutation = vi.fn(config => config);
+  const mockBuilder = {
+    query: mockBuilderQuery,
+    mutation: mockBuilderMutation,
+  };
+  const mockApiInstance = {
+    reducerPath: 'api' as const, 
+    tagTypes: ['Users'] as const,
+    endpoints: {},
+    enhanceEndpoints: vi.fn(),
+    injectEndpoints: vi.fn(function (this: any, { endpoints: endpointsCallback }: any) {
+      const definedEndpoints = endpointsCallback(mockBuilder);
+      this.endpoints = { ...this.endpoints, ...definedEndpoints };
 
-// Создаем моки для эндпоинтов
-const mockGetUsersEndpoint = {
-  query: mockQueryFn.mockImplementation((params: any) => ({
-    url: '/users',
-    method: 'GET',
-    params
-  })),
-  providesTags: mockProvidesTags
-};
+      Object.keys(definedEndpoints).forEach(key => {
+        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+        const endpointConfig = definedEndpoints[key];
+        if (typeof endpointConfig.query === 'function') {
+          (this as any)[`use${capitalizedKey}Query`] = vi.fn(() => ({ data: undefined, error: undefined, isLoading: false }));
+        }
+        if (typeof endpointConfig.mutation === 'function') { 
+          (this as any)[`use${capitalizedKey}Mutation`] = vi.fn(() => [vi.fn(), { data: undefined, error: undefined, isLoading: false }]);
+        }
+      });
+      return this;
+    }),
+  };
+  return { mockBuilder, mockApiInstance, mockBuilderQuery, mockBuilderMutation };
+});
 
-const mockGetUserByIdEndpoint = {
-  query: mockQueryFn.mockImplementation((id: any) => `/users/${id}`),
-  providesTags: mockProvidesTags
-};
-
-const mockCreateUserEndpoint = {
-  mutation: mockMutationFn.mockImplementation((userData: any) => ({
-    url: '/users',
-    method: 'POST',
-    body: userData
-  })),
-  invalidatesTags: mockInvalidatesTags
-};
-
-const mockUpdateUserEndpoint = {
-  mutation: mockMutationFn.mockImplementation((params: any) => {
-    const { id, data } = params;
-    return {
-      url: `/users/${id}`,
-      method: 'PUT',
-      body: data
-    };
-  }),
-  invalidatesTags: mockInvalidatesTags
-};
-
-const mockDeleteUserEndpoint = {
-  mutation: mockMutationFn.mockImplementation((id: any) => ({
-    url: `/users/${id}`,
-    method: 'DELETE'
-  })),
-  invalidatesTags: mockInvalidatesTags
-};
-
-// Мокируем модуль usersApi перед его использованием
-jest.mock('../usersApi', () => ({
-  usersApi: {
-    endpoints: {
-      getUsers: {},
-      getUserById: {},
-      createUser: {},
-      updateUser: {},
-      deleteUser: {}
-    }
-  },
-  useGetUsersQuery: jest.fn(),
-  useGetUserByIdQuery: jest.fn(),
-  useCreateUserMutation: jest.fn(),
-  useUpdateUserMutation: jest.fn(),
-  useDeleteUserMutation: jest.fn()
+// Мокируем '../index' чтобы предоставить наш mockApiInstance.
+// Фабрика vi.mock теперь может безопасно использовать mockApiInstance благодаря vi.hoisted
+vi.mock('../index', () => ({
+  api: mockApiInstance,
 }));
 
-// Мокируем базовый API
-jest.mock('../index', () => ({
-  api: {
-    reducerPath: 'api',
-    injectEndpoints: jest.fn().mockReturnValue({
-      endpoints: {
-        getUsers: mockGetUsersEndpoint,
-        getUserById: mockGetUserByIdEndpoint,
-        createUser: mockCreateUserEndpoint,
-        updateUser: mockUpdateUserEndpoint,
-        deleteUser: mockDeleteUserEndpoint,
-      },
-      useGetUsersQuery: mockUseGetUsersQuery,
-      useGetUserByIdQuery: mockUseGetUserByIdQuery,
-      useCreateUserMutation: mockUseCreateUserMutation,
-      useUpdateUserMutation: mockUseUpdateUserMutation,
-      useDeleteUserMutation: mockUseDeleteUserMutation
-    })
-  }
-}));
+// Импортируем usersApi ПОСЛЕ того, как все моки настроены.
+// Когда usersApi.ts импортируется, его вызов api.injectEndpoints будет использовать наш мок.
+import { 
+  usersApi, 
+  UsersQueryParams, 
+  UsersResponse 
+} from '../usersApi';
 
-// Импортируем модуль после мокирования
-import { usersApi, UsersQueryParams, UsersResponse, useGetUsersQuery, useGetUserByIdQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation } from '../usersApi';
 
 describe('Users API', () => {
-  // Очищаем моки перед каждым тестом
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    // Сбрасываем endpoints на mockApiInstance для изоляции тестов
+    mockApiInstance.endpoints = {}; 
+    // Также очищаем вызовы mockBuilder методов, если они проверяются в разных describe блоках
+    mockBuilderQuery.mockClear();
+    mockBuilderMutation.mockClear();
   });
 
-  describe('getUsers эндпоинт', () => {
-    it('должен правильно формировать URL и параметры', () => {
-      // Данные для теста
-      const params: UsersQueryParams = {
-        page: 1,
-        limit: 10,
-        sortBy: 'name',
-        sortOrder: 'asc',
-        name: 'Тест',
-        role: 'admin'
-      };
+  const getEndpointConfig = (endpointName: keyof typeof usersApi.endpoints) => {
+    return (usersApi.endpoints as any)[endpointName];
+  };
 
-      // Проверяем наличие эндпоинта
-      expect(usersApi.endpoints.getUsers).toBeDefined();
+  describe('getUsers эндпоинт', () => {
+    const params: UsersQueryParams = {
+      page: 1,
+      limit: 10,
+      sortBy: 'name' as any, 
+      sortOrder: 'asc',
+      name: 'Тест',
+      role: 'admin'
+    };
+    const mockUsers: UsersResponse = {
+      items: [
+        { id: '1', name: 'User 1', email: 'user1@example.com', role: 'admin' as any, createdAt: '2023-01-01', updatedAt: '2023-01-01' },
+        { id: '2', name: 'User 2', email: 'user2@example.com', role: 'manager' as any, createdAt: '2023-01-02', updatedAt: '2023-01-02' },
+      ],
+      total: 2,
+      page: 1,
+      limit: 10,
+      pages: 1
+    };
+
+    it('должен быть определен с правильной функцией query', () => {
+      const endpointConfig = getEndpointConfig('getUsers');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.query).toBe('function');
       
-      // Вызываем эндпоинт с параметрами
-      mockGetUsersEndpoint.query(params);
-      
-      // Проверяем, что запрос формируется правильно
-      expect(mockQueryFn).toHaveBeenCalledWith(params);
-      // Проверяем указанный в моке URL и метод
-      expect(mockQueryFn).toHaveBeenCalledTimes(1);
+      const queryArgs = endpointConfig.query(params);
+      expect(queryArgs).toEqual({
+        url: '/users',
+        method: 'GET',
+        params
+      });
     });
 
-    it('должен обрабатывать теги кэширования', () => {
-      // Тестовые данные
-      const mockUsers: UsersResponse = {
-        items: [
-          { id: '1', name: 'User 1', email: 'user1@example.com', role: 'admin', createdAt: '2023-01-01', updatedAt: '2023-01-01' },
-          { id: '2', name: 'User 2', email: 'user2@example.com', role: 'manager', createdAt: '2023-01-02', updatedAt: '2023-01-02' },
-        ],
-        total: 2,
-        page: 1,
-        limit: 10,
-        pages: 1
-      };
+    it('должен быть определен с правильной функцией providesTags', () => {
+      const endpointConfig = getEndpointConfig('getUsers');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.providesTags).toBe('function');
 
-      // Проверяем наличие функции providesTags
-      expect(mockGetUsersEndpoint.providesTags).toBeDefined();
-      
-      // Вызываем функцию providesTags с тестовыми данными
-      mockProvidesTags(mockUsers);
-      
-      // Проверяем, что функция была вызвана
-      expect(mockProvidesTags).toHaveBeenCalledWith(mockUsers);
+      const tags = endpointConfig.providesTags(mockUsers, undefined, params);
+      expect(tags).toEqual([
+        { type: 'Users', id: '1' },
+        { type: 'Users', id: '2' },
+        { type: 'Users', id: 'LIST' },
+      ]);
     });
   });
 
   describe('getUserById эндпоинт', () => {
-    it('должен правильно формировать URL с id', () => {
-      // Данные для теста
-      const userId = '123';
+    const userId = '123';
+    it('должен быть определен с правильной функцией query', () => {
+      const endpointConfig = getEndpointConfig('getUserById');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.query).toBe('function');
+      const queryArg = endpointConfig.query(userId);
+      expect(queryArg).toBe(`/users/${userId}`);
+    });
 
-      // Проверяем наличие эндпоинта
-      expect(usersApi.endpoints.getUserById).toBeDefined();
-      
-      // Вызываем эндпоинт с id
-      mockGetUserByIdEndpoint.query(userId);
-      
-      // Проверяем, что запрос формируется правильно
-      expect(mockQueryFn).toHaveBeenCalledWith(userId);
-      
-      // Проверяем, что URL формируется как `/users/${userId}`
-      expect(mockQueryFn).toHaveBeenCalledTimes(1);
+    it('должен быть определен с правильной функцией providesTags', () => {
+      const endpointConfig = getEndpointConfig('getUserById');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.providesTags).toBe('function');
+      const tags = endpointConfig.providesTags(undefined, undefined, userId);
+      expect(tags).toEqual([{ type: 'Users', id: userId }]);
     });
   });
 
   describe('createUser эндпоинт', () => {
-    it('должен правильно формировать запрос для создания пользователя', () => {
-      // Данные для теста
-      const newUser = {
-        name: 'Новый пользователь',
-        email: 'new@example.com',
-        password: 'password123',
-        role: 'user'
-      };
-
-      // Проверяем наличие эндпоинта
-      expect(usersApi.endpoints.createUser).toBeDefined();
-      
-      // Вызываем эндпоинт с данными нового пользователя
-      mockCreateUserEndpoint.mutation(newUser);
-      
-      // Проверяем, что запрос формируется правильно
-      expect(mockMutationFn).toHaveBeenCalledWith(newUser);
-      expect(mockMutationFn).toHaveBeenCalledTimes(1);
+    const newUser = {
+      name: 'Новый пользователь',
+      email: 'new@example.com',
+      password: 'password123',
+      role: 'user' as any
+    };
+    it('должен быть определен с правильной функцией mutation (query в RTK)', () => {
+      const endpointConfig = getEndpointConfig('createUser');
+      expect(endpointConfig).toBeDefined();
+      // Для мутаций, 'query' содержит функцию мутации
+      expect(typeof endpointConfig.query).toBe('function'); 
+      const mutationArgs = endpointConfig.query(newUser);
+      expect(mutationArgs).toEqual({
+        url: '/users',
+        method: 'POST',
+        body: newUser
+      });
     });
-
-    it('должен инвалидировать список пользователей после создания', () => {
-      // Проверяем наличие функции invalidatesTags
-      expect(mockCreateUserEndpoint.invalidatesTags).toBeDefined();
-      
-      // Вызываем функцию invalidatesTags
-      mockInvalidatesTags([{ type: 'Users', id: 'LIST' }]);
-      
-      // Проверяем вызов функции
-      expect(mockInvalidatesTags).toHaveBeenCalledWith([{ type: 'Users', id: 'LIST' }]);
+    it('должен быть определен с правильной функцией invalidatesTags', () => {
+      const endpointConfig = getEndpointConfig('createUser');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.invalidatesTags).toBe('function');
+      const tags = endpointConfig.invalidatesTags();
+      expect(tags).toEqual([{ type: 'Users', id: 'LIST' }]);
     });
   });
 
   describe('updateUser эндпоинт', () => {
-    it('должен правильно формировать запрос для обновления пользователя', () => {
-      // Данные для теста
-      const userId = '123';
-      const updateData = {
-        name: 'Обновленное имя',
-        role: 'manager'
-      };
-      const updateParams = { id: userId, data: updateData };
-
-      // Проверяем наличие эндпоинта
-      expect(usersApi.endpoints.updateUser).toBeDefined();
-      
-      // Вызываем эндпоинт с параметрами
-      mockUpdateUserEndpoint.mutation(updateParams);
-      
-      // Проверяем, что запрос формируется правильно
-      expect(mockMutationFn).toHaveBeenCalledWith(updateParams);
-      expect(mockMutationFn).toHaveBeenCalledTimes(1);
+    const userId = '123';
+    const updateData = {
+      name: 'Обновленный пользователь',
+      role: 'manager' as any
+    };
+    it('должен быть определен с правильной функцией mutation (query в RTK)', () => {
+      const endpointConfig = getEndpointConfig('updateUser');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.query).toBe('function');
+      const mutationArgs = endpointConfig.query({ id: userId, data: updateData });
+      expect(mutationArgs).toEqual({
+        url: `/users/${userId}`,
+        method: 'PUT',
+        body: updateData
+      });
     });
-
-    it('должен инвалидировать пользователя и список после обновления', () => {
-      // Проверяем наличие функции invalidatesTags
-      expect(mockUpdateUserEndpoint.invalidatesTags).toBeDefined();
-      
-      const userId = '123';
-      
-      // Вызываем функцию invalidatesTags
-      mockInvalidatesTags(null, null, { id: userId });
-      
-      // Проверяем вызов функции
-      expect(mockInvalidatesTags).toHaveBeenCalledWith(null, null, { id: userId });
+    it('должен быть определен с правильной функцией invalidatesTags', () => {
+      const endpointConfig = getEndpointConfig('updateUser');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.invalidatesTags).toBe('function');
+      const tags = endpointConfig.invalidatesTags(undefined, undefined, { id: userId, data: updateData });
+      expect(tags).toEqual([{ type: 'Users', id: userId }, { type: 'Users', id: 'LIST' }]);
     });
   });
 
   describe('deleteUser эндпоинт', () => {
-    it('должен правильно формировать запрос для удаления пользователя', () => {
-      // Данные для теста
-      const userId = '123';
-
-      // Проверяем наличие эндпоинта
-      expect(usersApi.endpoints.deleteUser).toBeDefined();
-      
-      // Вызываем эндпоинт с id пользователя
-      mockDeleteUserEndpoint.mutation(userId);
-      
-      // Проверяем, что запрос формируется правильно
-      expect(mockMutationFn).toHaveBeenCalledWith(userId);
-      expect(mockMutationFn).toHaveBeenCalledTimes(1);
+    const userId = '123';
+    it('должен быть определен с правильной функцией mutation (query в RTK)', () => {
+      const endpointConfig = getEndpointConfig('deleteUser');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.query).toBe('function');
+      const mutationArgs = endpointConfig.query(userId);
+      expect(mutationArgs).toEqual({
+        url: `/users/${userId}`,
+        method: 'DELETE'
+      });
     });
-
-    it('должен инвалидировать пользователя и список после удаления', () => {
-      // Проверяем наличие функции invalidatesTags
-      expect(mockDeleteUserEndpoint.invalidatesTags).toBeDefined();
-      
-      const userId = '123';
-      
-      // Вызываем функцию invalidatesTags
-      mockInvalidatesTags(null, null, userId);
-      
-      // Проверяем вызов функции
-      expect(mockInvalidatesTags).toHaveBeenCalledWith(null, null, userId);
+    it('должен быть определен с правильной функцией invalidatesTags', () => {
+      const endpointConfig = getEndpointConfig('deleteUser');
+      expect(endpointConfig).toBeDefined();
+      expect(typeof endpointConfig.invalidatesTags).toBe('function');
+      const tags = endpointConfig.invalidatesTags(undefined, undefined, userId);
+      expect(tags).toEqual([{ type: 'Users', id: userId }, { type: 'Users', id: 'LIST' }]);
     });
   });
 
-  describe('Хуки API пользователей', () => {
-    it('должен экспортировать все необходимые хуки для использования в компонентах', () => {
-      // Проверка экспорта хуков
-      expect(useGetUsersQuery).toBeDefined();
-      expect(typeof useGetUsersQuery).toBe('function');
-
-      expect(useGetUserByIdQuery).toBeDefined();
-      expect(typeof useGetUserByIdQuery).toBe('function');
-
-      expect(useCreateUserMutation).toBeDefined();
-      expect(typeof useCreateUserMutation).toBe('function');
-
-      expect(useUpdateUserMutation).toBeDefined();
-      expect(typeof useUpdateUserMutation).toBe('function');
-
-      expect(useDeleteUserMutation).toBeDefined();
-      expect(typeof useDeleteUserMutation).toBe('function');
+  describe('Экспортируемые хуки', () => {
+    it('должен экспортировать useGetUsersQuery', () => {
+      expect(usersApi.useGetUsersQuery).toBeDefined();
+      expect(typeof usersApi.useGetUsersQuery).toBe('function');
     });
-
-    it('должен правильно передавать параметры в запросы', () => {
-      // Проверяем, что хуки доступны из установленных моков
-      expect(mockUseGetUsersQuery).toBeDefined();
-      expect(mockUseGetUserByIdQuery).toBeDefined();
-      expect(mockUseCreateUserMutation).toBeDefined();
-      expect(mockUseUpdateUserMutation).toBeDefined();
-      expect(mockUseDeleteUserMutation).toBeDefined();
+    it('должен экспортировать useGetUserByIdQuery', () => {
+      expect(usersApi.useGetUserByIdQuery).toBeDefined();
+      expect(typeof usersApi.useGetUserByIdQuery).toBe('function');
     });
-  });
-
-  describe('Общая структура API пользователей', () => {
-    it('должен содержать все необходимые эндпоинты', () => {
-      // Проверяем наличие всех необходимых эндпоинтов
-      expect(usersApi.endpoints).toBeDefined();
-      expect(usersApi.endpoints.getUsers).toBeDefined();
-      expect(usersApi.endpoints.getUserById).toBeDefined(); 
-      expect(usersApi.endpoints.createUser).toBeDefined();
-      expect(usersApi.endpoints.updateUser).toBeDefined();
-      expect(usersApi.endpoints.deleteUser).toBeDefined();
+    it('должен экспортировать useCreateUserMutation', () => {
+      expect(usersApi.useCreateUserMutation).toBeDefined();
+      expect(typeof usersApi.useCreateUserMutation).toBe('function');
     });
-
-    it('должен использовать правильные методы HTTP для операций CRUD', () => {
-      // Проверяем что методы используются правильно (GET, POST, PUT, DELETE)
-      
-      // Вызываем эндпоинты с тестовыми данными
-      mockGetUsersEndpoint.query({});
-      mockCreateUserEndpoint.mutation({ name: 'Тест', email: 'test@example.com', password: 'password', role: 'user' });
-      mockUpdateUserEndpoint.mutation({ id: '1', data: { name: 'Новое имя' } });
-      mockDeleteUserEndpoint.mutation('1');
-      
-      // Проверяем вызовы
-      expect(mockQueryFn).toHaveBeenCalled();
-      expect(mockMutationFn).toHaveBeenCalled();
+    it('должен экспортировать useUpdateUserMutation', () => {
+      expect(usersApi.useUpdateUserMutation).toBeDefined();
+      expect(typeof usersApi.useUpdateUserMutation).toBe('function');
+    });
+    it('должен экспортировать useDeleteUserMutation', () => {
+      expect(usersApi.useDeleteUserMutation).toBeDefined();
+      expect(typeof usersApi.useDeleteUserMutation).toBe('function');
     });
   });
 });

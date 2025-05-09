@@ -5,9 +5,10 @@
  * функций и определений, связанных с ролями пользователей.
  */
 
-import { describe, it, expect } from '@jest/globals';
-// Используем локальное определение Role вместо импорта из shared
-// import { Role } from '@finance-platform/shared';
+import { Role } from '@finance-platform/shared';
+import { Permission } from '../abilities'; 
+import { userHasPermission } from '../roles'; 
+
 import { 
   adminPermissions,
   managerPermissions,
@@ -264,4 +265,8 @@ describe('Roles and Permissions', () => {
       expect(permissions).toEqual([]);
     });
   });
+});
+
+describe('userHasPermission', () => {
+  // TODO: реализовать тесты для userHasPermission
 });

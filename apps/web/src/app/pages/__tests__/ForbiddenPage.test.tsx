@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { ForbiddenPage } from '../ForbiddenPage';
+import ForbiddenPage from '../ForbiddenPage';
 
 describe('ForbiddenPage', () => {
   it('должен отрендерить страницу с ошибкой доступа', () => {

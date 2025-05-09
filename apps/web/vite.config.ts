@@ -1,8 +1,9 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+// import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'; // Temporarily removed
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import path from 'path';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -15,11 +16,19 @@ export default defineConfig(() => ({
     port: 4300,
     host: 'localhost',
   },
-  plugins: [react(), nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
+  plugins: [react(), /* nxViteTsPaths(), */ nxCopyAssetsPlugin(['*.md'])], // Temporarily removed nxViteTsPaths()
   // Uncomment this if you are using workers.
   // worker: {
-  //  plugins: [ nxViteTsPaths() ],
+  //  plugins: [ /* nxViteTsPaths() */ ], // Also remove here if it was active
   // },
+  resolve: {
+    alias: {
+      '@finance-platform/shared': path.resolve(__dirname, '../../libs/shared/src/index.ts'),
+      '@finance-platform/web-mocks': path.resolve(__dirname, '../../mocks/src/index.ts'),
+      '@finance-platform/web-state': path.resolve(__dirname, '../../state/src/index.ts'),
+      '@finance-platform/web-ui': path.resolve(__dirname, '../../ui/src/index.ts'),
+    },
+  },
   build: {
     outDir: '../../dist/apps/web',
     emptyOutDir: true,
@@ -30,11 +39,8 @@ export default defineConfig(() => ({
   },
   test: {
     globals: true,
-    cache: {
-      dir: '../../node_modules/.vitest',
-    },
     environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    setupFiles: ['./src/test-setup.ts'],
+    setupFiles: ['./src/vitest-setup.ts'],
   },
 }));

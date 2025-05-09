@@ -11,7 +11,6 @@ import '@testing-library/jest-dom'; // Импортируем базовый м�
 // Для обхода ошибок типизации используем приведение типов (as any)
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';

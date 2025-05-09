@@ -24,7 +24,6 @@ enum Role {
 }
 
 // Импортируем тестовые утилиты
-import { describe, it, expect } from '@jest/globals';
 import '@testing-library/jest-dom';
 
 describe('ProtectedRoute - интеграционные тесты', () => {

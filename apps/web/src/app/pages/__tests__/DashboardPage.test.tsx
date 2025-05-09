@@ -4,8 +4,8 @@
  * Этот модуль содержит тесты для компонента страницы дашборда.
  */
 
+import { vi } from 'vitest';
 import React from 'react';
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { DashboardPage } from '../DashboardPage';
 import * as useAuthModule from '../../../auth/hooks/useAuth';
@@ -39,15 +39,15 @@ interface AuthResponse {
 }
 
 // Мокируем компоненты и хуки
-jest.mock('../../../auth/components/LogoutButton', () => ({
-  LogoutButton: jest.fn(() => <button data-testid="logout-button">Выйти</button>),
+vi.mock('../../../auth/components/LogoutButton', () => ({
+  LogoutButton: vi.fn(() => <button data-testid="logout-button">Выйти</button>),
 }));
 
 describe('DashboardPage', () => {
   // Подготовка мока useAuth перед каждым тестом
   beforeEach(() => {
     // Мокируем useAuth согласно прагматичному подходу
-    jest.spyOn(useAuthModule, 'useAuth').mockImplementation(() => ({
+    vi.spyOn(useAuthModule, 'useAuth').mockImplementation(() => ({
       user: {
         id: '1',
         name: 'Test User',
@@ -62,11 +62,11 @@ describe('DashboardPage', () => {
       permissions: ['read:dashboard', 'read:transactions'],
       isLoading: false,
       error: null,
-      hasRole: jest.fn((requiredRole) => requiredRole === Role.User),
-      hasPermission: jest.fn(() => true),
+      hasRole: vi.fn((requiredRole) => requiredRole === Role.User),
+      hasPermission: vi.fn(() => true),
       
       // Правильно типизируем мок-функции с приведением к unknown
-      login: jest.fn(() => Promise.resolve({ 
+      login: vi.fn(() => Promise.resolve({ 
         token: 'token', 
         refreshToken: 'refresh-token',
         accessToken: 'access-token',
@@ -74,9 +74,9 @@ describe('DashboardPage', () => {
         user: { id: '1', name: 'Test User', email: 'test@example.com', role: 'user' } 
       })) as unknown as (credentials: LoginRequest) => Promise<AuthResponse>,
       
-      logout: jest.fn(() => Promise.resolve()) as unknown as () => Promise<void>,
+      logout: vi.fn(() => Promise.resolve()) as unknown as () => Promise<void>,
       
-      refreshToken: jest.fn(() => Promise.resolve({ 
+      refreshToken: vi.fn(() => Promise.resolve({ 
         token: 'new-token', 
         refreshToken: 'new-refresh-token',
         accessToken: 'new-access-token',
@@ -86,7 +86,7 @@ describe('DashboardPage', () => {
     }));
 
     // Очищаем моки после каждого теста
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('должен отрендерить страницу дашборда с информацией о пользователе', () => {

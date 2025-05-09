@@ -5,9 +5,9 @@
  * функций-условий, используемых в системе разрешений.
  */
 
-import { describe, it, expect } from '@jest/globals';
-// Удаляем неиспользуемый импорт Role
-// import { Role } from '@finance-platform/shared';
+import { Condition, User, Resource } from '../conditions'; // Убедитесь, что пути правильные
+import { Role } from '@finance-platform/shared';
+
 import * as conditions from '../conditions';
 
 describe('Permission Conditions', () => {

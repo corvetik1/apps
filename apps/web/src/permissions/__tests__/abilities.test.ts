@@ -1,23 +1,23 @@
 // abilities.test.ts
-import { describe, it, expect, jest } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Мокируем зависимости
-jest.mock('@casl/ability', () => {
-  const mockCan = jest.fn().mockReturnValue(true);
+vi.mock('@casl/ability', () => {
+  const mockCan = vi.fn().mockReturnValue(true);
   const mockAbility = { can: mockCan };
   
   return {
-    createMongoAbility: jest.fn().mockReturnValue(mockAbility),
-    AbilityBuilder: jest.fn().mockImplementation(() => ({
-      can: jest.fn(),
-      cannot: jest.fn(),
-      build: jest.fn().mockReturnValue(mockAbility)
+    createMongoAbility: vi.fn().mockReturnValue(mockAbility),
+    AbilityBuilder: vi.fn().mockImplementation(() => ({
+      can: vi.fn(),
+      cannot: vi.fn(),
+      build: vi.fn().mockReturnValue(mockAbility)
     }))
   };
 });
 
-jest.mock('@finance-platform/shared', () => ({
+vi.mock('@finance-platform/shared', () => ({
   Role: {
     Admin: 'admin',
     Manager: 'manager',
@@ -40,7 +40,7 @@ enum Role {
 
 describe('CASL Abilities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   
   describe('defineAbilitiesFor', () => {

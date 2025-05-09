@@ -340,7 +340,13 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                         <Tooltip title="Просмотреть">
                           <IconButton
                             size="small"
-                            sx={styles.actionButton}
+                            sx={{
+                              minWidth: 'auto',
+                              padding: '4px',
+                              margin: '0 2px',
+                              borderRadius: '50%',
+                              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.08)' }
+                            }}
                             onClick={() => onViewUser(user)}
                             aria-label="Просмотреть пользователя"
                             color="info"
@@ -353,7 +359,13 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                         <Tooltip title="Редактировать">
                           <IconButton
                             size="small"
-                            sx={styles.actionButton}
+                            sx={{
+                              minWidth: 'auto',
+                              padding: '4px',
+                              margin: '0 2px',
+                              borderRadius: '50%',
+                              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.08)' }
+                            }}
                             onClick={() => onEditUser(user)}
                             aria-label="Редактировать пользователя"
                             color="primary"
@@ -367,8 +379,10 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                         <IconButton
                           size="small"
                           sx={{
-                            ...styles.actionButton,
-                            ...styles.deleteButton,
+                            minWidth: 'auto',
+                            padding: '4px',
+                            margin: '0 2px',
+                            borderRadius: '50%',
                             color: 'error.main',
                             '&:hover': { backgroundColor: 'error.light' }
                           }}

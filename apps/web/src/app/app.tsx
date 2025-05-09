@@ -5,6 +5,7 @@ import { LoginPage } from '../auth/pages/LoginPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ForbiddenPage } from './pages/ForbiddenPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { UsersPage } from '../users/pages/UsersPage';
 import AppBarAndMenu from '../components/AppBarAndMenu';
 import { useAuth } from '../auth/hooks/useAuth';
 import { AdminPage } from '../admin/pages/AdminPage';
@@ -60,11 +61,7 @@ function AppWithAuth() {
             <Route path="/investments" element={<PlaceholderPage title="Инвестиции" />} />
             <Route path="/notes" element={<PlaceholderPage title="Заметки" />} />
             <Route path="/gallery" element={<PlaceholderPage title="Галерея" />} />
-            {/* Администрирование */}
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/users" element={<AdminPage />} />
-            <Route path="/admin/settings" element={<AdminPage />} />
-            <Route path="/admin/audit" element={<AdminPage />} />
+            <Route path="/admin/*" element={<AdminPage />} />
             <Route path="/profile" element={<PlaceholderPage title="Профиль пользователя" />} />
           </Route>
 

@@ -311,107 +311,187 @@ describe('defineAbilitiesFor', () => {
 
 Пример: `apps/web/src/permissions/__tests__/abilities.test.ts`
 
-### 2. Типизация тестов
+### 2. Тестирование с Vitest и мокирование RTK Query API
 
-В проекте реализованы решения для корректной типизации тестов с использованием Jest и Testing Library.
+Для интеграционного тестирования компонентов, взаимодействующих с RTK Query API, используется следующий подход:
 
-### 1. Использование стандартных матчеров Jest вместо специализированных
+#### 2.1. Структура моков API (Vitest)
 
-Для обеспечения строгой типизации в тестах мы используем стандартные матчеры Jest вместо специализированных матчеров Testing Library:
-
-```typescript
-// Вместо этого (может вызвать проблемы с типами)
-expect(screen.getByText('Заголовок')).toBeInTheDocument();
-expect(screen.queryByText('Нет элемента')).not.toBeInTheDocument();
-
-// Используем это (стандартные матчеры с надежной типизацией)
-expect(screen.getByText('Заголовок')).toBeTruthy();
-expect(screen.queryByText('Нет элемента')).toBeNull();
-```
-
-Преимущества этого подхода:
-
-- **Надежная типизация** - стандартные матчеры Jest имеют стабильную типизацию
-- **Совместимость** - работает во всех версиях TypeScript и Jest без необходимости обновления типов
-- **Простота** - не требуется настраивать дополнительные файлы типов или сложные конфигурации
-
-Функционально эти проверки эквивалентны, потому что:
-
-- `screen.getByText()` возвращает элемент или выбрасывает ошибку, поэтому `toBeTruthy()` всегда пройдет, если элемент найден
-- `screen.queryByText()` возвращает элемент или null, поэтому `toBeNull()` пройдет только если элемент не найден
-
-### 2. Тестирование DOM и асинхронных операций
-
-Для тестирования DOM и асинхронных операций с сохранением надежной типизации используем следующие подходы:
-
-#### Тестирование DOM-элементов
+Мокирование API RTK Query выполняется с использованием `vi.mock()`. Важно правильно смоделировать структуру, возвращаемую хуками RTK Query (`useQuery`, `useMutation`).
 
 ```typescript
-// Для проверки видимости элемента
-// Вместо: expect(element).toBeVisible()
-expect(window.getComputedStyle(element).display).not.toBe('none');
+// Пример мока для ../../api
+vi.mock('../../api', () => {
+  // Создаем мок-функции для каждого эндпоинта
+  const mockGetUsers = vi.fn();
+  const mockCreateUser = vi.fn();
+  const mockUpdateUser = vi.fn();
+  const mockDeleteUser = vi.fn();
 
-// Для проверки классов
-// Вместо: expect(element).toHaveClass('active')
-expect(element.classList.contains('active')).toBe(true);
+  // Формируем объект, имитирующий структуру API
+  const mockApi = {
+    api: {
+      reducerPath: 'api', // Важно для configureStore
+      reducer: {}, // Пустой объект, если не тестируем сам редьюсер
+      middleware: vi.fn(() => vi.fn()), // Мок middleware
+      endpoints: {
+        getUsers: {
+          useQuery: mockGetUsers.mockReturnValue({
+            data: {
+              items: [
+                // Пример данных пользователя
+                { id: '1', name: 'Иван Иванов', email: 'ivan@example.com', role: 'admin', createdAt: '...', updatedAt: '...' },
+                { id: '2', name: 'Петр Петров', email: 'petr@example.com', role: 'manager', createdAt: '...', updatedAt: '...' },
+              ],
+              total: 2,
+              page: 1,
+              limit: 10,
+              pages: 1,
+            },
+            isLoading: false,
+            error: null,
+            refetch: vi.fn(), // Мок для функции refetch
+          }),
+        },
+        createUser: {
+          useMutation: mockCreateUser.mockReturnValue([
+            vi.fn().mockResolvedValue({ id: '3', name: 'Новый Пользователь', email: 'new@example.com', role: 'user' }), // Мок функции-триггера мутации
+            { isLoading: false, error: null }, // Состояние мутации
+          ]),
+        },
+        updateUser: {
+          useMutation: mockUpdateUser.mockReturnValue([
+            vi.fn().mockResolvedValue({ id: '1', name: 'Обновленный Иванов', email: 'ivan@example.com', role: 'admin' }),
+            { isLoading: false, error: null },
+          ]),
+        },
+        deleteUser: {
+          useMutation: mockDeleteUser.mockReturnValue([
+            vi.fn().mockResolvedValue({}),
+            { isLoading: false },
+          ]),
+        },
+      },
+    },
+  };
 
-// Для проверки атрибутов
-// Вместо: expect(element).toHaveAttribute('data-testid', 'test')
-expect(element.getAttribute('data-testid')).toBe('test');
-
-// Для проверки текстового содержимого
-// Вместо: expect(element).toHaveTextContent('текст')
-expect(element.textContent).toContain('текст');
-```
-
-#### Тестирование асинхронных операций
-
-```typescript
-// Для ожидания элемента
-// Вместо: await waitFor(() => expect(element).toBeInTheDocument())
-await waitFor(() => expect(screen.getByText('Загрузка завершена')).toBeTruthy());
-
-// Для проверки асинхронных изменений состояния
-test('асинхронная загрузка данных', async () => {
-  render(<AsyncComponent />);
-  
-  // Проверяем состояние загрузки
-  expect(screen.getByText('Загрузка...')).toBeTruthy();
-  
-  // Ждем завершения загрузки
-  await waitFor(() => {
-    expect(screen.queryByText('Загрузка...')).toBeNull();
-    expect(screen.getByText('Данные загружены')).toBeTruthy();
-  });
-  
-  // Проверяем результаты
-  expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0);
+  return mockApi; // Возвращаем полную структуру мока
 });
 ```
 
-#### Преимущества этого подхода
+**Ключевые моменты:**
+- Каждый хук (`useQuery`, `useMutation`) должен возвращать структуру, соответствующую реальному API.
+- Для `useQuery` это объект с полями `data`, `isLoading`, `error`, `refetch`.
+- Для `useMutation` это массив, где первый элемент — функция-триггер мутации, а второй — объект состояния мутации (`isLoading`, `error`).
 
-1. **Надежная типизация** — используются только стандартные методы DOM API и матчеры Jest, которые имеют стабильную типизацию.
+#### 2.2. Доступ к мокам в тестах
 
-2. **Прозрачность** — явно видно, что именно тестируется. Например, `element.classList.contains('active')` более прозрачно показывает, что мы проверяем наличие класса.
+Поскольку API мокируется глобально с помощью `vi.mock()`, для доступа к конкретным мок-функциям внутри тестов (например, для `expect(mockFunction).toHaveBeenCalledWith(...)`) используется динамический импорт `require()`:
 
-3. **Независимость от версий библиотек** — такой подход меньше зависит от конкретных версий Testing Library или Jest.
+```typescript
+import { api as actualApi } from '../../api'; // Может потребоваться для типов
 
-4. **Производительность** — прямые проверки DOM-свойств и стандартные матчеры Jest часто работают быстрее, чем специализированные матчеры.
+describe('SomeComponent', () => {
+  it('should call getUsers on mount', async () => {
+    // Получаем доступ к мокированному модулю API внутри теста
+    const { api: mockedApi } = require('../../api');
+    const mockGetUsersQuery = mockedApi.endpoints.getUsers.useQuery;
 
-5. **Совместимость с CI** — меньше шансов получить ложные срабатывания в CI из-за несовместимости типов или версий библиотек.
+    renderWithProviders(<SomeComponent />);
 
-#### Компромисс между выразительностью и надежностью
+    await waitFor(() => {
+      expect(mockGetUsersQuery).toHaveBeenCalled();
+    });
+  });
 
-Специализированные матчеры Testing Library имеют свои преимущества:
+  it('should call createUser mutation with correct data', async () => {
+    const { api: mockedApi } = require('../../api');
+    const createUserMutationTrigger = mockedApi.endpoints.createUser.useMutation[0];
 
-- **Выразительность и читаемость** — матчеры как `toBeInTheDocument()` или `toHaveTextContent()` делают код тестов более понятным с первого взгляда.
+    renderWithProviders(<SomeComponent />);
+    // ... симуляция действий пользователя для вызова мутации ...
 
-- **Информативные сообщения об ошибках** — при падении теста специализированные матчеры часто выдают более подробные сообщения.
+    await waitFor(() => {
+      expect(createUserMutationTrigger).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Test User', email: 'test@example.com' })
+      );
+    });
+  });
+});
+```
 
-- **Дополнительные проверки** — например, `toBeVisible()` проверяет не только `display: none`, но и другие способы скрытия элемента.
+**Почему `require()`?**
+- Статический `import` выполняется до того, как `vi.mock()` заменит модуль, поэтому импортированный `api` будет оригинальным, а не мокированным.
+- `require()` внутри теста (или `beforeEach`) позволяют получить доступ к уже мокированной версии модуля.
 
-Однако в нашем проекте приоритет отдан строгой типизации и стабильности CI, поэтому мы выбрали подход с использованием стандартных матчеров Jest, которые обеспечивают надежность типизации.
+#### 2.3. Настройка тестового окружения
+
+**`createTestStore()`**
+
+Функция для создания Redux store для тестов должна использовать мокированный API:
+
+```typescript
+const createTestStore = () => {
+  // Динамический импорт мокированного API
+  const { api } = require('../../api');
+
+  return configureStore({
+    reducer: {
+      [api.reducerPath]: api.reducer,
+      auth: authReducer, // Другие редьюсеры
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(api.middleware),
+    // ... preloadedState ...
+  });
+};
+```
+
+**`renderWithProviders()`**
+
+Хелпер для рендеринга компонентов с провайдерами (Redux Store, Theme, Router) должен использовать `createTestStore()`:
+
+```typescript
+import { render } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { ThemeProvider } from '@mui/material/styles';
+import { BrowserRouter } from 'react-router-dom';
+// ... импорты createTestStore, theme ...
+
+export const renderWithProviders = (ui: React.ReactElement, { route = '/' } = {}) => {
+  const store = createTestStore();
+  window.history.pushState({}, 'Test page', route);
+
+  return {
+    ...render(
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <BrowserRouter>{ui}</BrowserRouter>
+        </ThemeProvider>
+      </Provider>
+    ),
+    store, // Возвращаем store для возможности дополнительных проверок
+  };
+};
+```
+
+#### 2.4. Асинхронные операции и `waitFor`
+
+При тестировании асинхронных операций (например, вызовов API при монтировании компонента или после действий пользователя) необходимо использовать `waitFor` из `@testing-library/react` для ожидания завершения этих операций перед выполнением проверок (`expect`).
+
+```typescript
+await waitFor(() => {
+  expect(screen.getByText('User Loaded')).toBeInTheDocument();
+  expect(mockApiFunction).toHaveBeenCalled();
+});
+```
+
+#### 2.5. Важные замечания
+
+- **Удаление статических импортов API**: Если в тестовом файле используется `vi.mock('../../api', ...)`, то статический `import { api } from '../../api';` в начале файла должен быть удален или закомментирован, чтобы избежать конфликтов.
+- **Типизация**: Для сохранения типизации при работе с моками можно использовать `vi.mocked()` или явное приведение типов, если это необходимо, хотя динамический `require` может усложнить статическую типизацию моков.
+
+Этот подход обеспечивает надежное и предсказуемое тестирование компонентов, использующих RTK Query, изолируя их от реальных сетевых запросов и позволяя точно контролировать возвращаемые данные и состояния API.
 
 ### 3. Мокирование функций API
 

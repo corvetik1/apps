@@ -199,6 +199,19 @@ export const seedDb = () => {
     updatedAt: '2023-01-01T00:00:00Z',
   });
 
+  // Добавляем тестового пользователя для useAuth.test.tsx
+  db.user.create({
+    id: '6',
+    email: 'test@example.com',
+    name: 'Тестовый Пользователь',
+    password: 'password123', // Используется в useAuth.test.tsx
+    role: Role.User,
+    departmentId: '2',
+    transactionLimit: 100000,
+    createdAt: '2023-01-01T00:00:00Z',
+    updatedAt: '2023-01-01T00:00:00Z',
+  });
+
   // Добавляем счета
   db.account.create({
     id: '1',

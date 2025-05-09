@@ -2,20 +2,25 @@
  * Тесты для компонента UsersTable
  *
  * Этот файл содержит тесты для проверки функциональности таблицы пользователей,
- * включая сортировку, пагинацию и действия с пользователями.
+ * включая отображение данных, сортировку, пагинацию и действия с пользователями.
  */
+
+// Используем глобальные объекты из Vitest, которые доступны через vitest-setup.ts
+// Это позволяет избежать проблем с импортом в CommonJS модулях
+
+import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from 'vitest';
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { UsersTable } from '../UsersTable';
 import { api } from '../../../api';
+import { useGetUsersQuery } from '../../../api/usersApi';
 
 // Мокируем shared модуль
-jest.mock('@finance-platform/shared', () => {
+vi.mock('@finance-platform/shared', () => {
   const mockRole = {
     Admin: 'admin',
     Manager: 'manager',
@@ -39,18 +44,18 @@ const mockRole = {
 };
 
 // Мокируем хук useAbility
-jest.mock('../../../permissions/abilities', () => ({
-  useAbility: jest.fn().mockReturnValue({
-    can: jest.fn().mockReturnValue(true)
+vi.mock('../../../permissions/abilities', () => ({
+  useAbility: vi.fn().mockReturnValue({
+    can: vi.fn().mockReturnValue(true)
   }),
   __esModule: true,
   default: {}
 }));
 
 // Мокируем хук useGetUsersQuery
-jest.mock('../../../api/usersApi', () => ({
+vi.mock('../../../api/usersApi', () => ({
   __esModule: true,
-  useGetUsersQuery: jest.fn().mockReturnValue({
+  useGetUsersQuery: vi.fn().mockReturnValue({
     data: {
       items: [
         {
@@ -116,12 +121,12 @@ const renderWithProviders = (ui: React.ReactElement) => {
 
 describe('UsersTable', () => {
   // Мокируем обработчики событий
-  const mockOnViewUser = jest.fn();
-  const mockOnEditUser = jest.fn();
-  const mockOnDeleteUser = jest.fn();
+  const mockOnViewUser = vi.fn();
+  const mockOnEditUser = vi.fn();
+  const mockOnDeleteUser = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('должен корректно отображать таблицу с пользователями', () => {
@@ -134,23 +139,23 @@ describe('UsersTable', () => {
     );
 
     // Проверяем, что заголовки таблицы отображаются
-    expect(screen.getByText('Имя')).toBeInTheDocument();
-    expect(screen.getByText('Email')).toBeInTheDocument();
-    expect(screen.getByText('Роль')).toBeInTheDocument();
-    expect(screen.getByText('Действия')).toBeInTheDocument();
+    expect(screen.getByText('Имя')).toBeTruthy();
+    expect(screen.getByText('Email')).toBeTruthy();
+    expect(screen.getByText('Роль')).toBeTruthy();
+    expect(screen.getByText('Действия')).toBeTruthy();
 
     // Проверяем, что данные пользователей отображаются
-    expect(screen.getByText('Иван Иванов')).toBeInTheDocument();
-    expect(screen.getByText('ivan@example.com')).toBeInTheDocument();
-    expect(screen.getByText('admin')).toBeInTheDocument();
+    expect(screen.getByText('Иван Иванов')).toBeTruthy();
+    expect(screen.getByText('ivan@example.com')).toBeTruthy();
+    expect(screen.getByText('admin')).toBeTruthy();
 
-    expect(screen.getByText('Петр Петров')).toBeInTheDocument();
-    expect(screen.getByText('petr@example.com')).toBeInTheDocument();
-    expect(screen.getByText('manager')).toBeInTheDocument();
+    expect(screen.getByText('Петр Петров')).toBeTruthy();
+    expect(screen.getByText('petr@example.com')).toBeTruthy();
+    expect(screen.getByText('manager')).toBeTruthy();
 
-    expect(screen.getByText('Анна Сидорова')).toBeInTheDocument();
-    expect(screen.getByText('anna@example.com')).toBeInTheDocument();
-    expect(screen.getByText('user')).toBeInTheDocument();
+    expect(screen.getByText('Анна Сидорова')).toBeTruthy();
+    expect(screen.getByText('anna@example.com')).toBeTruthy();
+    expect(screen.getByText('user')).toBeTruthy();
   });
 
   it('должен вызывать обработчики действий при нажатии на кнопки', async () => {
@@ -197,7 +202,7 @@ describe('UsersTable', () => {
 
   it('должен отображать сообщение, если нет данных', () => {
     // Переопределяем мок для пустого списка пользователей
-    jest.requireMock('../../../api/usersApi').useGetUsersQuery.mockReturnValue({
+    (useGetUsersQuery as Mock).mockReturnValue({
       data: {
         items: [],
         total: 0,
@@ -218,13 +223,13 @@ describe('UsersTable', () => {
     );
 
     // Проверяем, что отображается сообщение о пустом списке
-    expect(screen.getByText('Пользователи не найдены')).toBeInTheDocument();
-    expect(screen.getByText('Попробуйте изменить параметры фильтрации')).toBeInTheDocument();
+    expect(screen.getByText('Пользователи не найдены')).toBeTruthy();
+    expect(screen.getByText('Попробуйте изменить параметры фильтрации')).toBeTruthy();
   });
 
   it('должен отображать состояние загрузки', () => {
     // Переопределяем мок для состояния загрузки
-    jest.requireMock('../../../api/usersApi').useGetUsersQuery.mockReturnValue({
+    (useGetUsersQuery as Mock).mockReturnValue({
       data: null,
       isLoading: true,
       error: null
@@ -246,7 +251,7 @@ describe('UsersTable', () => {
 
   it('должен отображать сообщение об ошибке', () => {
     // Переопределяем мок для состояния ошибки
-    jest.requireMock('../../../api/usersApi').useGetUsersQuery.mockReturnValue({
+    (useGetUsersQuery as Mock).mockReturnValue({
       data: null,
       isLoading: false,
       error: { status: 500, data: { message: 'Ошибка сервера' } }
@@ -261,8 +266,8 @@ describe('UsersTable', () => {
     );
 
     // Проверяем, что отображается сообщение об ошибке
-    expect(screen.getByText('Ошибка загрузки данных')).toBeInTheDocument();
-    expect(screen.getByText('Попробуйте обновить страницу')).toBeInTheDocument();
+    expect(screen.getByText('Ошибка загрузки данных')).toBeTruthy();
+    expect(screen.getByText('Попробуйте обновить страницу')).toBeTruthy();
   });
 
   it('должен корректно работать с фильтрами', () => {
@@ -281,17 +286,20 @@ describe('UsersTable', () => {
     );
 
     // Проверяем, что хук useGetUsersQuery был вызван с правильными параметрами
-    expect(jest.requireMock('../../../api/usersApi').useGetUsersQuery).toHaveBeenCalledWith(
+    expect(useGetUsersQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Иван',
+        email: '',
         role: mockRole.Admin,
         page: 1,
-        limit: 10
+        limit: 10,
+        sortBy: 'name',
+        sortOrder: 'asc'
       })
     );
   });
 
-  it('должен корректно обрабатывать сортировку', () => {
+  it('должен корректно обрабатывать сортировку', async () => {
     renderWithProviders(
       <UsersTable
         onViewUser={mockOnViewUser}
@@ -312,7 +320,23 @@ describe('UsersTable', () => {
     }
 
     // Проверяем, что хук useGetUsersQuery был вызван с обновленными параметрами сортировки
-    expect(jest.requireMock('../../../api/usersApi').useGetUsersQuery).toHaveBeenCalledWith(
+    expect(useGetUsersQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sortBy: 'name',
+        sortOrder: 'desc'
+      })
+    );
+
+    // Кликаем еще раз для сортировки по возрастанию
+    if (nameHeader) {
+      const sortButton = nameHeader.querySelector('.MuiTableSortLabel-root');
+      if (sortButton) {
+        fireEvent.click(sortButton);
+      }
+    }
+
+    // Проверяем, что хук useGetUsersQuery был вызван с обновленными параметрами сортировки
+    expect(useGetUsersQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         sortBy: 'name',
         sortOrder: 'asc'
@@ -322,15 +346,25 @@ describe('UsersTable', () => {
 
   it('должен корректно обрабатывать пагинацию', () => {
     // Переопределяем мок для большего количества пользователей
-    jest.requireMock('../../../api/usersApi').useGetUsersQuery.mockReturnValue({
+    (useGetUsersQuery as Mock).mockReturnValue({
       data: {
         items: [
-          // ... первые 10 пользователей
+          { id: '1', name: 'User 1', email: 'user1@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '2', name: 'User 2', email: 'user2@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '3', name: 'User 3', email: 'user3@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '4', name: 'User 4', email: 'user4@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '5', name: 'User 5', email: 'user5@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '6', name: 'User 6', email: 'user6@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '7', name: 'User 7', email: 'user7@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '8', name: 'User 8', email: 'user8@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '9', name: 'User 9', email: 'user9@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '10', name: 'User 10', email: 'user10@example.com', role: 'user', createdAt: '', updatedAt: '' },
+          { id: '11', name: 'User 11', email: 'user11@example.com', role: 'user', createdAt: '', updatedAt: '' },
         ],
-        total: 25,
+        total: 11,
         page: 1,
         limit: 10,
-        pages: 3
+        pages: 2
       },
       isLoading: false,
       error: null
@@ -350,12 +384,9 @@ describe('UsersTable', () => {
     // Нажимаем на кнопку
     fireEvent.click(nextPageButton);
 
-    // Проверяем, что хук useGetUsersQuery был вызван с обновленными параметрами пагинации
-    expect(jest.requireMock('../../../api/usersApi').useGetUsersQuery).toHaveBeenCalledWith(
-      expect.objectContaining({
-        page: 2,
-        limit: 10
-      })
+    // Проверяем, что хук useGetUsersQuery был вызван с параметрами для второй страницы
+    expect(useGetUsersQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 2, limit: 10 })
     );
   });
 });

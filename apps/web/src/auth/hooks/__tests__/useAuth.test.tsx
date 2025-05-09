@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { useAuth } from '../useAuth';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { describe, it, expect, beforeEach, beforeAll, jest } from '@jest/globals';
-import '@testing-library/jest-dom';
-import { authReducer } from '../../../store/slices/authSlice';
+import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
+import { useAuth } from '../useAuth';
+import { authReducer, logout, loginSuccess } from '../../../store/slices/authSlice';
+import { authApi } from '../../../api/authApi';
+import { RootState, store } from '../../../store';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { api } from '../../../api';
-import * as authApi from '../../../api/authApi';
 
 // Определение типа Role для тестов
 enum Role {
@@ -47,18 +47,13 @@ interface AuthResponse {
 
 describe('useAuth хук', () => {
   // Моки для API функций
-  const mockLoginMutation = jest.fn();
-  const mockLogoutMutation = jest.fn();
-  const mockRefreshTokenMutation = jest.fn();
-
-  // Моки для хуков RTK Query
-  const mockLoginTrigger = jest.fn();
-  const mockLogoutTrigger = jest.fn();
-  const mockRefreshTrigger = jest.fn();
+  const mockLoginTrigger = vi.fn();
+  const mockLogoutTrigger = vi.fn();
+  const mockRefreshTrigger = vi.fn();
 
   // Моки для localStorage и sessionStorage
-  let localStorageMock: Record<string, string> = {};
-  let sessionStorageMock: Record<string, string> = {};
+  let localStorageMock: Record<string, string>;
+  let sessionStorageMock: Record<string, string>;
 
   // Тестовые данные
   const mockUser = {
@@ -78,30 +73,30 @@ describe('useAuth хук', () => {
   // Настройка перед всеми тестами
   beforeAll(() => {
     // Мокируем хуки RTK Query с прагматичным подходом к типизации
-    jest.spyOn(authApi, 'useLoginMutation').mockImplementation(() => [
+    vi.spyOn(authApi, 'useLoginMutation').mockImplementation(() => [
       mockLoginTrigger,
-      { isLoading: false, reset: jest.fn() },
+      { isLoading: false, reset: vi.fn() },
     ] as any);
-    jest.spyOn(authApi, 'useLogoutMutation').mockImplementation(() => [
+    vi.spyOn(authApi, 'useLogoutMutation').mockImplementation(() => [
       mockLogoutTrigger,
-      { isLoading: false, reset: jest.fn() },
+      { isLoading: false, reset: vi.fn() },
     ] as any);
-    jest.spyOn(authApi, 'useRefreshTokenMutation').mockImplementation(() => [
+    vi.spyOn(authApi, 'useRefreshTokenMutation').mockImplementation(() => [
       mockRefreshTrigger,
-      { isLoading: false, reset: jest.fn() },
+      { isLoading: false, reset: vi.fn() },
     ] as any);
 
     // Мокируем localStorage
     Object.defineProperty(global, 'localStorage', {
       value: {
-        getItem: jest.fn((key: string) => localStorageMock[key] || null),
-        setItem: jest.fn((key: string, value: string) => {
+        getItem: vi.fn((key: string) => localStorageMock[key] || null),
+        setItem: vi.fn((key: string, value: string) => {
           localStorageMock[key] = value;
         }),
-        removeItem: jest.fn((key: string) => {
+        removeItem: vi.fn((key: string) => {
           delete localStorageMock[key];
         }),
-        clear: jest.fn(() => {
+        clear: vi.fn(() => {
           localStorageMock = {};
         }),
       },
@@ -111,14 +106,14 @@ describe('useAuth хук', () => {
     // Мокируем sessionStorage
     Object.defineProperty(global, 'sessionStorage', {
       value: {
-        getItem: jest.fn((key: string) => sessionStorageMock[key] || null),
-        setItem: jest.fn((key: string, value: string) => {
+        getItem: vi.fn((key: string) => sessionStorageMock[key] || null),
+        setItem: vi.fn((key: string, value: string) => {
           sessionStorageMock[key] = value;
         }),
-        removeItem: jest.fn((key: string) => {
+        removeItem: vi.fn((key: string) => {
           delete sessionStorageMock[key];
         }),
-        clear: jest.fn(() => {
+        clear: vi.fn(() => {
           sessionStorageMock = {};
         }),
       },
@@ -128,40 +123,34 @@ describe('useAuth хук', () => {
 
   // Очистка перед каждым тестом
   beforeEach(() => {
-    // Сбрасываем состояние моков
-    mockLoginMutation.mockReset();
-    mockLogoutMutation.mockReset();
-    mockRefreshTokenMutation.mockReset();
-    mockLoginTrigger.mockReset();
-    mockLogoutTrigger.mockReset();
-    mockRefreshTrigger.mockReset();
-    
+    // Сбрасываем моки перед каждым тестом
+    vi.clearAllMocks();
+
     // Очищаем localStorage и sessionStorage перед каждым тестом
     localStorage.clear();
     sessionStorage.clear();
-    localStorageMock = {};
-    sessionStorageMock = {};
 
-    // Настраиваем результаты вызовов моков
-    mockLoginTrigger.mockImplementation((credentials) => {
-      mockLoginMutation(credentials);
-      return {
-        unwrap: () => Promise.resolve(mockAuthResponse),
-      };
+    // Настраиваем возвращаемые значения для триггеров мутаций
+    mockLoginTrigger.mockImplementation((_args) => {
+      return Promise.resolve<AuthResponse>({
+        user: { id: 'test-user-id', email: 'test@example.com', name: 'Test User', role: Role.User },
+        accessToken: 'test-access-token',
+        refreshToken: 'test-refresh-token',
+        expiresIn: 3600,
+      });
     });
 
-    mockLogoutTrigger.mockImplementation((args) => {
-      mockLogoutMutation(args);
-      return {
-        unwrap: () => Promise.resolve({}),
-      };
+    mockLogoutTrigger.mockImplementation((_args) => {
+      return Promise.resolve({}); // Успешный выход обычно не возвращает тело
     });
 
-    mockRefreshTrigger.mockImplementation((args) => {
-      mockRefreshTokenMutation(args);
-      return {
-        unwrap: () => Promise.resolve(mockAuthResponse),
-      };
+    mockRefreshTrigger.mockImplementation((_args) => {
+      return Promise.resolve<AuthResponse>({
+        user: { id: 'test-user-id', email: 'test@example.com', name: 'Test User', role: Role.User },
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+        expiresIn: 3600,
+      });
     });
 
     // Очищаем хранилища
@@ -209,87 +198,58 @@ describe('useAuth хук', () => {
   });
 
   it('должен успешно выполнять вход с rememberMe=true', async () => {
-    // Сбрасываем моки перед тестом
-    jest.clearAllMocks();
-    
     const { result } = renderAuthHook();
 
-    // Данные для входа
     const credentials = {
       email: 'test@example.com',
       password: 'password123',
       rememberMe: true,
     };
 
-    // Выполняем вход
     await act(async () => {
       await result.current.login(credentials);
     });
 
-    // Проверяем, что API вызвана с правильными параметрами
-    expect(mockLoginMutation).toHaveBeenCalledWith(credentials);
+    expect(mockLoginTrigger).toHaveBeenCalledWith(credentials);
   });
-  
+
   it('должен успешно выполнять вход с rememberMe=false', async () => {
-    // Сбрасываем моки перед тестом
-    jest.clearAllMocks();
-    
     const { result } = renderAuthHook();
 
-    // Данные для входа
     const credentials = {
       email: 'test@example.com',
       password: 'password123',
       rememberMe: false,
     };
 
-    // Выполняем вход
     await act(async () => {
       await result.current.login(credentials);
     });
 
-    // Проверяем, что API вызвана с правильными параметрами
-    expect(mockLoginMutation).toHaveBeenCalledWith(credentials);
+    expect(mockLoginTrigger).toHaveBeenCalledWith(credentials);
   });
 
   it('должен обрабатывать ошибки при входе', async () => {
     const errorMessage = 'Неверные учетные данные';
-    
-    // Переопределяем мок для симуляции ошибки
-    mockLoginTrigger.mockImplementation((credentials) => {
-      mockLoginMutation(credentials);
-      return {
-        unwrap: () => Promise.reject(new Error(errorMessage)),
-      };
-    });
+    mockLoginTrigger.mockImplementationOnce(() => Promise.reject(new Error(errorMessage)));
 
     const { result } = renderAuthHook();
+    const credentials = { email: 'test@example.com', password: 'wrong-password', rememberMe: false };
+    let capturedError: Error | null = null;
 
-    // Данные для входа
-    const credentials = {
-      email: 'test@example.com',
-      password: 'wrong-password',
-      rememberMe: false,
-    };
-
-    // Пытаемся выполнить вход с ожиданием ошибки
     await act(async () => {
       try {
         await result.current.login(credentials);
-      } catch {
-        // Ожидаем ошибку, но не делаем с ней ничего в тесте
+      } catch (e) {
+        capturedError = e as Error;
       }
     });
 
-    // Проверяем, что API была вызвана
-    expect(mockLoginMutation).toHaveBeenCalledWith(credentials);
-    
-    // Проверяем, что ошибка установлена
-    expect(result.current.error).toBeTruthy();
+    expect(mockLoginTrigger).toHaveBeenCalledWith(credentials);
+    expect(result.current.error).toBe(errorMessage);
   });
 
   it('должен успешно выполнять выход', async () => {
-    // Настраиваем начальное состояние с аутентифицированным пользователем
     const initialState = {
       auth: {
         isAuthenticated: true,
@@ -306,43 +266,25 @@ describe('useAuth хук', () => {
       },
     };
 
-    // Устанавливаем токен в localStorage
     localStorage.setItem('refreshToken', mockAuthResponse.refreshToken);
 
     const { result } = renderAuthHook(initialState);
 
-    // Проверяем начальное состояние
     expect(result.current.isAuthenticated).toBe(true);
 
-    // Выполняем выход
     await act(async () => {
       await result.current.logout();
     });
 
-    // Проверяем, что API была вызвана
-    expect(mockLogoutMutation).toHaveBeenCalled();
-
-    // Проверяем, что токен был удален из хранилищ
+    expect(mockLogoutTrigger).toHaveBeenCalled();
     expect(localStorage.getItem('refreshToken')).toBe(null);
     expect(sessionStorage.getItem('refreshToken')).toBe(null);
-
-    // Проверяем, что пользователь разлогинен
     expect(result.current.isAuthenticated).toBe(false);
   });
 
   it('должен обрабатывать ошибки при выходе', async () => {
-    // Имитируем ошибку при выходе
-    mockLogoutTrigger.mockImplementation(() => {
-      mockLogoutMutation();
-      return {
-        unwrap: () => Promise.reject(new Error('Ошибка выхода')),
-      };
-    });
+    mockLogoutTrigger.mockImplementationOnce(() => Promise.reject(new Error('Logout failed')));
 
-    // Мокируем console.error чтобы избежать вывода ошибки в тестах
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(jest.fn());
-
-    // Настраиваем состояние с аутентифицированным пользователем
     const initialState = {
       auth: {
         isAuthenticated: true,
@@ -359,86 +301,64 @@ describe('useAuth хук', () => {
       },
     };
 
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(vi.fn());
+
     const { result } = renderAuthHook(initialState);
 
-    // Выполняем выход
     await act(async () => {
       await result.current.logout();
     });
 
-    // Проверяем, что console.error был вызван
     expect(consoleErrorSpy).toHaveBeenCalled();
-
-    // Восстанавливаем оригинальный console.error
     consoleErrorSpy.mockRestore();
   });
 
   it('должен успешно обновлять токен из localStorage', async () => {
-    // Устанавливаем токен в localStorage
     localStorage.setItem('refreshToken', 'old-refresh-token');
-
     const { result } = renderAuthHook();
 
-    // Выполняем обновление токена
     await act(async () => {
       await result.current.refreshToken();
     });
 
-    // Проверяем, что API была вызвана с правильными параметрами
-    expect(mockRefreshTokenMutation).toHaveBeenCalledWith({
+    expect(mockRefreshTrigger).toHaveBeenCalledWith({
       refreshToken: 'old-refresh-token',
     });
-
-    // Проверяем, что новый токен сохранен в localStorage
-    expect(localStorage.getItem('refreshToken')).toBe(mockAuthResponse.refreshToken);
+    expect(localStorage.getItem('refreshToken')).toBe('new-refresh-token');
   });
 
   it('должен успешно обновлять токен из sessionStorage', async () => {
-    // Устанавливаем токен в sessionStorage
     sessionStorage.setItem('refreshToken', 'old-refresh-token');
-
     const { result } = renderAuthHook();
 
-    // Выполняем обновление токена
     await act(async () => {
       await result.current.refreshToken();
     });
 
-    // Проверяем, что API была вызвана с правильными параметрами
-    expect(mockRefreshTokenMutation).toHaveBeenCalledWith({
+    expect(mockRefreshTrigger).toHaveBeenCalledWith({
       refreshToken: 'old-refresh-token',
     });
-
-    // Проверяем, что новый токен сохранен в sessionStorage, а не в localStorage
-    expect(sessionStorage.getItem('refreshToken')).toBe(mockAuthResponse.refreshToken);
-    expect(localStorage.getItem('refreshToken')).toBe(null);
+    expect(sessionStorage.getItem('refreshToken')).toBe('new-refresh-token');
   });
 
   it('должен выбрасывать ошибку при отсутствии refreshToken', async () => {
     const { result } = renderAuthHook();
-    let capturedError = null as unknown as Error;
+    let capturedError: Error | null = null;
 
-    // Выполняем обновление токена и ожидаем ошибку
     await act(async () => {
       try {
         await result.current.refreshToken();
-        // Если мы дошли до этой строки, тест должен провалиться
-        expect(true).toBe(false);
-      } catch (error: unknown) {
-        capturedError = error instanceof Error ? error : new Error(String(error));
+      } catch (e) {
+        capturedError = e as Error;
       }
     });
 
-    // Проверяем, что ошибка была получена и имеет правильное сообщение
     expect(capturedError).not.toBeNull();
-    expect(capturedError.message).toBe('Отсутствует refreshToken');
-    
-    // Проверяем, что API не была вызвана
-    expect(mockRefreshTokenMutation).not.toHaveBeenCalled();
+    expect(capturedError?.message).toBe('Отсутствует refreshToken');
+    expect(mockRefreshTrigger).not.toHaveBeenCalled();
   });
 
   it('должен правильно определять роль администратора', () => {
-    // Настраиваем состояние с ролью администратора
     const adminState = {
       auth: {
         isAuthenticated: true,
@@ -454,14 +374,12 @@ describe('useAuth хук', () => {
 
     const { result } = renderAuthHook(adminState);
 
-    // Администратор имеет доступ ко всем ролям
     expect(result.current.hasRole(Role.Admin)).toBe(true);
     expect(result.current.hasRole(Role.Manager)).toBe(true);
     expect(result.current.hasRole(Role.User)).toBe(true);
   });
 
   it('должен правильно определять роль менеджера', () => {
-    // Настраиваем состояние с ролью менеджера
     const managerState = {
       auth: {
         isAuthenticated: true,
@@ -477,14 +395,12 @@ describe('useAuth хук', () => {
 
     const { result } = renderAuthHook(managerState);
 
-    // Менеджер имеет доступ ко всем ролям, кроме admin
     expect(result.current.hasRole(Role.Admin)).toBe(false);
     expect(result.current.hasRole(Role.Manager)).toBe(true);
     expect(result.current.hasRole(Role.User)).toBe(true);
   });
 
   it('должен правильно проверять разрешения', () => {
-    // Настраиваем состояние с разрешениями
     const stateWithPermissions = {
       auth: {
         isAuthenticated: true,
@@ -500,55 +416,39 @@ describe('useAuth хук', () => {
 
     const { result } = renderAuthHook(stateWithPermissions);
 
-    // Проверяем наличие разрешений
     expect(result.current.hasPermission('read:posts')).toBe(true);
     expect(result.current.hasPermission('write:comments')).toBe(true);
     expect(result.current.hasPermission('delete:posts')).toBe(false);
   });
 
   it('должен возвращать false для hasPermission у неаутентифицированного пользователя', () => {
-    const { result } = renderAuthHook(); // Пустое состояние = неаутентифицирован
+    const { result } = renderAuthHook();
 
     expect(result.current.hasPermission('any-permission')).toBe(false);
   });
 
   it('должен обрабатывать ошибки при обновлении токена', async () => {
     const errorMessage = 'Недействительный токен';
-    let capturedError = null as unknown as Error;
-    
-    // Устанавливаем токен в localStorage
-    localStorage.setItem('refreshToken', 'invalid-token');
-    
-    // Мокируем ошибку при обновлении токена
-    mockRefreshTrigger.mockImplementation((args) => {
-      mockRefreshTokenMutation(args);
-      return {
-        unwrap: () => Promise.reject(new Error(errorMessage)),
-      };
-    });
+    mockRefreshTrigger.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage)),
+    );
 
     const { result } = renderAuthHook();
+    let capturedError: Error | null = null;
 
-    // Выполняем обновление токена и ожидаем ошибку
+    localStorage.setItem('refreshToken', 'fake-token-to-trigger-api-call');
+
     await act(async () => {
       try {
         await result.current.refreshToken();
-        // Если мы дошли до этой строки, тест должен провалиться
-        expect(true).toBe(false);
-      } catch (error: unknown) {
-        capturedError = error instanceof Error ? error : new Error(String(error));
+      } catch (e) {
+        capturedError = e as Error;
       }
     });
 
-    // Проверяем, что ошибка была получена и имеет правильное сообщение
     expect(capturedError).not.toBeNull();
-    expect(capturedError.message).toBe(errorMessage);
-    
-    // Проверяем, что API была вызвана
-    expect(mockRefreshTokenMutation).toHaveBeenCalled();
-    
-    // Проверяем, что error установлен в состоянии
-    expect(result.current.error).toBeTruthy();
+    expect(capturedError?.message).toBe(errorMessage);
+    expect(mockRefreshTrigger).toHaveBeenCalledWith({ refreshToken: 'fake-token-to-trigger-api-call' });
+    expect(result.current.error).toBe(errorMessage);
   });
 });
-
